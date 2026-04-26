@@ -146,6 +146,21 @@
       <div id="placeholder" class="card">
         <div class="empty-state">选择一条消息查看回复建议</div>
       </div>
+
+      <!-- 自动模式：选中消息后显示，点击按钮才分析 -->
+      <div id="selectedCard" class="card" style="display:none">
+        <div class="section-title">选中的消息</div>
+        <div class="message-box" id="selectedContent"></div>
+        <div class="label" style="margin-top:12px">我现在想...</div>
+        <div class="goal-row" id="autoGoalRow">
+          <button class="goal-btn" data-goal="agree">答应</button>
+          <button class="goal-btn" data-goal="decline">婉拒</button>
+          <button class="goal-btn" data-goal="advance">推进</button>
+          <button class="goal-btn" data-goal="maintain">维持关系</button>
+          <button class="goal-btn active" data-goal="casual">随便回</button>
+        </div>
+        <button class="btn" id="analyzeBtn" onclick="analyzeSelected()">生成回复建议</button>
+      </div>
     </div>
   </div>
 </div>
@@ -259,14 +274,38 @@
     }).join('')
   }
 
-  // 选择消息
-  async function selectMessage(msgId) {
+  // 自动模式目标选择
+  document.querySelectorAll('#autoGoalRow .goal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#autoGoalRow .goal-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      selectedGoal = btn.dataset.goal
+    })
+  })
+
+  // 选择消息（只高亮，不自动分析）
+  function selectMessage(msgId) {
     selectedMessage = messages.find(m => m.id === msgId)
     if (!selectedMessage) return
 
     renderMessages()
 
-    // 自动生成回复
+    // 右侧显示选中消息，等待用户点击分析
+    document.getElementById('placeholder').style.display = 'none'
+    document.getElementById('result').style.display = 'none'
+    document.getElementById('selectedCard').style.display = 'block'
+    document.getElementById('selectedContent').textContent = selectedMessage.content
+    document.getElementById('analyzeBtn').disabled = false
+    document.getElementById('analyzeBtn').textContent = '生成回复建议'
+  }
+
+  // 点击按钮后才触发分析
+  async function analyzeSelected() {
+    if (!selectedMessage) return
+    const btn = document.getElementById('analyzeBtn')
+    btn.disabled = true
+    btn.textContent = '生成中...'
+    document.getElementById('selectedCard').style.display = 'none'
     await generateReply(selectedMessage.contactId, selectedMessage.content)
   }
 

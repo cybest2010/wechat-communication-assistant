@@ -13,7 +13,7 @@ export async function callAI(prompt: string, options: AIOptions = {}): Promise<s
   const { maxTokens = 1000, temperature = 0.7 } = options
 
   const response = await axios.post(
-    `${AI_API_URL}/v1/messages`,
+    `${AI_API_URL}/v1/chat/completions`,
     {
       model: AI_MODEL,
       max_tokens: maxTokens,
@@ -22,13 +22,12 @@ export async function callAI(prompt: string, options: AIOptions = {}): Promise<s
     },
     {
       headers: {
-        'x-api-key': AI_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
+        'Authorization': `Bearer ${AI_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       timeout: 30000,
     }
   )
 
-  return response.data?.content?.[0]?.text || ''
+  return response.data?.choices?.[0]?.message?.content || ''
 }
