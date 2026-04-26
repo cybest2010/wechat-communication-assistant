@@ -1,11 +1,14 @@
 import express from 'express'
 import path from 'path'
+import { WebSocketServer, WebSocket } from 'ws'
+import { createServer } from 'http'
 import { generateReplies } from '../reasoning/assistant'
 import { buildProfile, confirmWeakness, dismissWeakness } from '../analysis/profile-builder'
 import { getProfile, saveContact, getContact, getAllContacts, addFeedback } from '../data/storage'
 import { exportAllMessages } from '../data/weflow-client'
 import { registry } from '../skill/skill-registry'
 import { UserGoal, WeaknessId, Occasion, RelationshipType, RelationshipStatus } from '../types'
+import { messageListener } from '../data/message-listener'
 
 const app = express()
 app.use(express.json())
@@ -104,11 +107,67 @@ app.get('/api/skills', (_req, res) => {
   res.json({ skills: registry.summary() })
 })
 
+// --- 监听器控制 ---
+
+app.post('/api/listener/start', (_req, res) => {
+  messageListener.start(2000)
+  res.json({ ok: true })
+})
+
+app.post('/api/listener/stop', (_req, res) => {
+  messageListener.stop()
+  res.json({ ok: true })
+})
+
 // --- 启动 ---
 
 export function startServer(port = 8080) {
-  app.listen(port, () => {
+  const server = createServer(app)
+  const wss = new WebSocketServer({ server })
+
+  // WebSocket 连接管理
+  const clients = new Set<WebSocket>()
+
+  wss.on('connection', (ws) => {
+    console.log('[WebSocket] Client connected')
+    clients.add(ws)
+
+    ws.on('close', () => {
+      console.log('[WebSocket] Client disconnected')
+      clients.delete(ws)
+    })
+
+    ws.on('error', (err) => {
+      console.error('[WebSocket] Error:', err)
+      clients.delete(ws)
+    })
+
+    // 发送连接确认
+    ws.send(JSON.stringify({ type: 'connected' }))
+  })
+
+  // 启动消息监听器
+  messageListener.onMessage((message) => {
+    // 广播新消息给所有连接的客户端
+    const payload = JSON.stringify({
+      type: 'new_message',
+      data: message,
+    })
+
+    clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(payload)
+      }
+    })
+  })
+
+  // 启动轮询（2秒一次）
+  messageListener.start(2000)
+
+  server.listen(port, () => {
     console.log(`[Server] Running at http://localhost:${port}`)
+    console.log(`[WebSocket] Ready for connections`)
+    console.log(`[MessageListener] Polling for new messages...`)
   })
 }
 
