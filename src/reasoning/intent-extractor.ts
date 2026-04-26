@@ -1,4 +1,4 @@
-import { IntentResult, Message, Occasion } from '../types'
+import { IntentResult, Message, Occasion, SceneType, EmotionType } from '../types'
 import { callAI } from './ai-client'
 
 export async function extractIntent(
@@ -28,9 +28,9 @@ ${recentHistory}
     const raw = await callAI(prompt, { maxTokens: 200, temperature: 0 })
     const json = extractJSON(raw)
     return {
-      intent: json.intent || 'casual',
+      intent: (json.intent || 'casual') as SceneType,
       challenge: json.challenge || '不确定如何回应',
-      emotion: json.emotion || 'neutral',
+      emotion: (json.emotion || 'neutral') as EmotionType,
     }
   } catch {
     return { intent: 'casual', challenge: '不确定如何回应', emotion: 'neutral' }
