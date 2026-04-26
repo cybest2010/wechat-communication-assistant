@@ -6,111 +6,207 @@
 <title>微信沟通助手</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f5f5f5; color: #333; }
-  .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  h1 { font-size: 18px; font-weight: 600; color: #111; }
-  .mode-switch { display: flex; gap: 8px; align-items: center; }
-  .toggle { position: relative; display: inline-block; width: 48px; height: 24px; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; }
-  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-  input:checked + .slider { background-color: #07c160; }
-  input:checked + .slider:before { transform: translateX(24px); }
-  .mode-label { font-size: 13px; color: #666; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
+
+  /* 顶栏 */
+  .topbar { background: #fff; border-bottom: 1px solid #eee; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 16px; font-weight: 700; color: #111; }
+  .logo span { color: #07c160; }
+  .stats { display: flex; gap: 16px; }
+  .stat-item { font-size: 12px; color: #888; }
+  .stat-item strong { color: #333; font-weight: 600; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .mode-switch { display: flex; align-items: center; gap: 8px; }
+  .mode-label { font-size: 13px; color: #999; }
   .mode-label.active { color: #07c160; font-weight: 600; }
-  .layout { display: flex; gap: 16px; }
-  .left-panel { flex: 1; }
-  .right-panel { flex: 1; }
-  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #111; }
-  .messages-container { max-height: 600px; overflow-y: auto; }
-  .message-item { border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
-  .message-item:hover { border-color: #07c160; background: #f6ffed; }
-  .message-item.selected { border-color: #07c160; background: #e8f9ee; }
-  .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .message-contact { font-size: 13px; font-weight: 600; color: #111; }
-  .message-time { font-size: 11px; color: #999; }
-  .message-content { font-size: 14px; color: #333; line-height: 1.4; }
-  .empty-state { text-align: center; padding: 40px 20px; color: #999; font-size: 13px; }
-  .label { font-size: 12px; color: #888; margin-bottom: 6px; }
-  .goal-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-  .goal-btn { border: 1.5px solid #ddd; background: #fff; border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
-  .goal-btn.active { border-color: #07c160; background: #e8f9ee; color: #07c160; }
+  .toggle { position: relative; display: inline-block; width: 44px; height: 22px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: #ccc; transition: .3s; border-radius: 22px; }
+  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; transition: .3s; border-radius: 50%; }
+  input:checked + .slider { background: #07c160; }
+  input:checked + .slider:before { transform: translateX(22px); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+  .status-dot.connected { background: #52c41a; box-shadow: 0 0 0 3px rgba(82,196,26,0.2); }
+  .status-text { font-size: 12px; color: #999; }
+
+  /* 主体 */
+  .main { max-width: 1100px; margin: 0 auto; padding: 20px; display: flex; gap: 16px; align-items: flex-start; }
+  .left-panel { width: 360px; flex-shrink: 0; }
+  .right-panel { flex: 1; min-width: 0; }
+
+  /* 卡片 */
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .card-title { font-size: 14px; font-weight: 600; color: #111; }
+  .card-badge { font-size: 11px; color: #07c160; background: #e8f9ee; padding: 2px 8px; border-radius: 10px; }
+
+  /* 场合选择 */
+  .occasion-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .occasion-btn { border: 1.5px solid #e8e8e8; background: #fafafa; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all 0.15s; color: #555; }
+  .occasion-btn:hover { border-color: #07c160; color: #07c160; }
+  .occasion-btn.active { border-color: #07c160; background: #e8f9ee; color: #07c160; font-weight: 600; }
+
+  /* 目标选择 */
+  .goal-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .goal-btn { border: 1.5px solid #e8e8e8; background: #fff; border-radius: 20px; padding: 5px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; color: #555; }
   .goal-btn:hover { border-color: #07c160; }
-  textarea { width: 100%; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 10px; font-size: 14px; resize: vertical; min-height: 80px; outline: none; font-family: inherit; }
-  textarea:focus { border-color: #07c160; }
-  .btn { background: #07c160; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 10px; }
-  .btn:hover { background: #06ad56; }
-  .btn:disabled { background: #ccc; cursor: not-allowed; }
-  .btn-secondary { background: #fff; color: #07c160; border: 1.5px solid #07c160; }
-  .btn-secondary:hover { background: #f6ffed; }
-  .analysis { font-size: 13px; color: #555; line-height: 1.6; padding: 10px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; }
-  .tip { font-size: 12px; color: #fa8c16; background: #fff7e6; border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; }
-  .framework-tip { font-size: 12px; color: #1677ff; background: #e6f4ff; border-radius: 6px; padding: 6px 10px; margin-bottom: 10px; }
-  .reply-item { border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 12px; margin-bottom: 8px; position: relative; }
+  .goal-btn.active { border-color: #07c160; background: #e8f9ee; color: #07c160; font-weight: 600; }
+
+  /* 输入区 */
+  .label { font-size: 12px; color: #888; margin-bottom: 5px; }
+  textarea { width: 100%; border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 10px 12px; font-size: 14px; resize: vertical; min-height: 90px; outline: none; font-family: inherit; line-height: 1.5; color: #333; background: #fafafa; }
+  textarea:focus { border-color: #07c160; background: #fff; }
+  .char-count { text-align: right; font-size: 11px; color: #ccc; margin-top: 3px; }
+
+  /* 按钮 */
+  .btn-primary { background: #07c160; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: 500; transition: background 0.15s; }
+  .btn-primary:hover { background: #06ad56; }
+  .btn-primary:disabled { background: #a8d5b5; cursor: not-allowed; }
+
+  /* 消息列表 */
+  .messages-container { max-height: 560px; overflow-y: auto; }
+  .messages-container::-webkit-scrollbar { width: 4px; }
+  .messages-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 2px; }
+  .msg-item { display: flex; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; }
+  .msg-item:hover { background: #f5f5f5; }
+  .msg-item.selected { background: #e8f9ee; }
+  .msg-item.selected .msg-name { color: #07c160; }
+  .msg-avatar { width: 38px; height: 38px; border-radius: 8px; background: #d9d9d9; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #fff; }
+  .msg-body { flex: 1; min-width: 0; }
+  .msg-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .msg-name { font-size: 13px; font-weight: 600; color: #222; }
+  .msg-time { font-size: 11px; color: #bbb; flex-shrink: 0; }
+  .msg-preview { font-size: 13px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-group-tag { font-size: 11px; color: #aaa; background: #f5f5f5; padding: 1px 6px; border-radius: 4px; margin-bottom: 2px; display: inline-block; }
+  .msg-unread { width: 8px; height: 8px; background: #07c160; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .empty-state { text-align: center; padding: 48px 20px; color: #bbb; font-size: 13px; line-height: 2; }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* 右侧区域 */
+  .placeholder { text-align: center; padding: 80px 20px; color: #bbb; font-size: 13px; }
+  .placeholder-icon { font-size: 40px; margin-bottom: 12px; }
+
+  /* 选中消息预览卡 */
+  .selected-card { }
+  .msg-bubble { background: #f0f0f0; border-radius: 12px; border-top-left-radius: 2px; padding: 10px 14px; font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 14px; word-break: break-all; }
+  .msg-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .msg-meta-name { font-size: 13px; font-weight: 600; color: #333; }
+  .msg-meta-time { font-size: 12px; color: #aaa; }
+  .msg-meta-type { font-size: 11px; color: #666; background: #f0f0f0; padding: 1px 7px; border-radius: 4px; }
+
+  /* 分析结果 */
+  .scene-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .scene-tag { font-size: 12px; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
+  .scene-tag.intent { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+  .scene-tag.emotion { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+  .scene-tag.emotion.negative { background: #fff1f0; color: #cf1322; border-color: #ffa39e; }
+  .scene-tag.emotion.urgent { background: #fff2e8; color: #d4380d; border-color: #ffbb96; }
+  .analysis-text { font-size: 13px; color: #555; line-height: 1.7; padding: 10px 12px; background: #fafafa; border-radius: 8px; border-left: 3px solid #07c160; }
+  .tip-box { font-size: 12px; padding: 7px 10px; border-radius: 6px; margin-top: 8px; display: flex; gap: 6px; align-items: flex-start; }
+  .tip-box.warn { background: #fff7e6; color: #d46b08; border: 1px solid #ffe7ba; }
+  .tip-box.info { background: #e6f4ff; color: #0958d9; border: 1px solid #bae0ff; }
+
+  /* 回复建议 */
+  .reply-item { border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 13px 14px; margin-bottom: 8px; position: relative; transition: border-color 0.15s; }
+  .reply-item:hover { border-color: #b7eb8f; }
   .reply-item.recommended { border-color: #07c160; background: #f6ffed; }
-  .reply-badge { position: absolute; top: -8px; left: 12px; background: #07c160; color: #fff; font-size: 11px; padding: 1px 8px; border-radius: 10px; }
-  .reply-text { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
-  .reply-reason { font-size: 12px; color: #888; }
-  .copy-btn { float: right; background: #f0f0f0; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; margin-top: -2px; }
-  .copy-btn:hover { background: #e0e0e0; }
+  .reply-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .reply-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .reply-tag { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: #f0f0f0; color: #666; }
+  .reply-tag.rec { background: #e8f9ee; color: #07c160; font-weight: 600; }
+  .copy-btn { background: #f5f5f5; border: none; border-radius: 6px; padding: 3px 10px; font-size: 12px; cursor: pointer; color: #666; flex-shrink: 0; }
+  .copy-btn:hover { background: #e8f9ee; color: #07c160; }
   .copy-btn.copied { background: #d4edda; color: #28a745; }
-  .avoid-item { font-size: 13px; color: #666; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+  .reply-text { font-size: 14px; font-weight: 500; color: #222; line-height: 1.5; margin-bottom: 5px; }
+  .reply-reason { font-size: 12px; color: #999; }
+
+  /* 避免说 */
+  .avoid-item { display: flex; gap: 8px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
   .avoid-item:last-child { border-bottom: none; }
-  .avoid-text { color: #ff4d4f; font-weight: 500; }
+  .avoid-label { color: #ff4d4f; font-weight: 500; flex-shrink: 0; }
   .avoid-reason { color: #999; }
-  .section-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
-  .contact-input { display: flex; gap: 8px; margin-bottom: 12px; }
-  .contact-input input { flex: 1; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; }
-  .contact-input input:focus { border-color: #07c160; }
-  .loading { text-align: center; color: #888; padding: 20px; font-size: 14px; }
-  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-  .status-badge.connected { background: #d4edda; color: #28a745; }
-  .status-badge.disconnected { background: #f8d7da; color: #dc3545; }
-  .manual-mode { display: none; }
-  .manual-mode.active { display: block; }
+
+  /* 骨架屏 */
+  .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .sk-line { height: 13px; margin-bottom: 8px; }
+  .sk-line.short { width: 40%; }
+  .sk-line.mid { width: 70%; }
+  .sk-line.full { width: 100%; }
+  .sk-block { height: 60px; margin-bottom: 10px; }
+
+  /* 分隔线 */
+  .divider { height: 1px; background: #f0f0f0; margin: 12px 0; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>微信沟通助手</h1>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">微信<span>沟通</span>助手</div>
+    <div class="stats">
+      <div class="stat-item">今日收到 <strong id="statReceived">0</strong> 条</div>
+      <div class="stat-item">已分析 <strong id="statAnalyzed">0</strong> 条</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">未连接</span>
     <div class="mode-switch">
-      <span class="mode-label" id="manualLabel">手动模式</span>
+      <span class="mode-label" id="manualLabel">手动</span>
       <label class="toggle">
         <input type="checkbox" id="modeToggle" checked>
         <span class="slider"></span>
       </label>
-      <span class="mode-label active" id="autoLabel">自动模式</span>
-      <span class="status-badge disconnected" id="statusBadge">未连接</span>
+      <span class="mode-label active" id="autoLabel">自动</span>
     </div>
   </div>
+</div>
 
-  <div class="layout">
-    <!-- 左侧：消息列表（自动模式） -->
-    <div class="left-panel" id="autoMode">
+<div class="main">
+
+  <!-- 左侧 -->
+  <div class="left-panel">
+
+    <!-- 自动模式：消息列表 -->
+    <div id="autoPanel">
       <div class="card">
-        <div class="card-title">实时消息</div>
+        <div class="card-header">
+          <span class="card-title">实时消息</span>
+          <span class="card-badge" id="unreadBadge" style="display:none">有新消息</span>
+        </div>
         <div class="messages-container" id="messagesContainer">
-          <div class="empty-state">等待新消息...</div>
+          <div class="empty-state">
+            <div class="empty-icon">💬</div>
+            等待 WeFlow 推送新消息...<br>
+            <span style="font-size:11px">确保 WeFlow HTTP API 服务已开启</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 手动模式输入 -->
-    <div class="left-panel manual-mode" id="manualMode">
+    <!-- 手动模式：输入区 -->
+    <div id="manualPanel" style="display:none">
       <div class="card">
-        <div class="label">联系人 ID（微信 ID 或群 ID）</div>
-        <div class="contact-input">
-          <input id="contactId" type="text" placeholder="输入联系人 ID" />
+        <div class="card-title" style="margin-bottom:12px">粘贴消息</div>
+
+        <div class="label">场合</div>
+        <div class="occasion-row" id="manualOccasionRow">
+          <button class="occasion-btn active" data-occasion="friend">朋友</button>
+          <button class="occasion-btn" data-occasion="work">工作群</button>
+          <button class="occasion-btn" data-occasion="family">家人</button>
+          <button class="occasion-btn" data-occasion="colleague">同事</button>
+          <button class="occasion-btn" data-occasion="stranger">陌生人</button>
         </div>
 
         <div class="label">对方发来的消息</div>
-        <textarea id="message" placeholder="粘贴对方的消息..."></textarea>
+        <textarea id="manualMessage" placeholder="粘贴对方的消息内容..." oninput="updateCharCount(this)"></textarea>
+        <div class="char-count"><span id="charCount">0</span> 字</div>
 
         <div class="label" style="margin-top:12px">我现在想...</div>
-        <div class="goal-row" id="goalRow">
+        <div class="goal-row" id="manualGoalRow">
           <button class="goal-btn" data-goal="agree">答应</button>
           <button class="goal-btn" data-goal="decline">婉拒</button>
           <button class="goal-btn" data-goal="advance">推进</button>
@@ -118,272 +214,372 @@
           <button class="goal-btn active" data-goal="casual">随便回</button>
         </div>
 
-        <button class="btn" id="submitBtn" onclick="submitManual()">生成回复建议</button>
+        <button class="btn-primary" id="submitBtn" onclick="submitManual()">生成回复建议</button>
       </div>
     </div>
 
-    <!-- 右侧：回复建议 -->
-    <div class="right-panel">
-      <div id="result" style="display:none">
-        <div class="card" id="analysisCard">
-          <div class="section-title">局势分析</div>
-          <div class="analysis" id="analysisText"></div>
-          <div id="weaknessTip"></div>
-          <div id="frameworkTip"></div>
-        </div>
+  </div>
 
-        <div class="card">
-          <div class="section-title">回复建议</div>
-          <div id="repliesContainer"></div>
-        </div>
+  <!-- 右侧 -->
+  <div class="right-panel">
 
-        <div class="card" id="avoidCard">
-          <div class="section-title">建议避免</div>
-          <div id="avoidContainer"></div>
-        </div>
-      </div>
-
-      <div id="placeholder" class="card">
-        <div class="empty-state">选择一条消息查看回复建议</div>
-      </div>
-
-      <!-- 自动模式：选中消息后显示，点击按钮才分析 -->
-      <div id="selectedCard" class="card" style="display:none">
-        <div class="section-title">选中的消息</div>
-        <div class="message-box" id="selectedContent"></div>
-        <div class="label" style="margin-top:12px">我现在想...</div>
-        <div class="goal-row" id="autoGoalRow">
-          <button class="goal-btn" data-goal="agree">答应</button>
-          <button class="goal-btn" data-goal="decline">婉拒</button>
-          <button class="goal-btn" data-goal="advance">推进</button>
-          <button class="goal-btn" data-goal="maintain">维持关系</button>
-          <button class="goal-btn active" data-goal="casual">随便回</button>
-        </div>
-        <button class="btn" id="analyzeBtn" onclick="analyzeSelected()">生成回复建议</button>
+    <!-- 默认占位 -->
+    <div id="placeholder" class="card">
+      <div class="placeholder">
+        <div class="placeholder-icon">✨</div>
+        选择左侧一条消息，或切换到手动模式粘贴消息<br>
+        <span style="font-size:11px; color:#ddd">AI 会分析场景并给出最适合你的回复</span>
       </div>
     </div>
+
+    <!-- 选中消息预览（自动模式） -->
+    <div id="selectedCard" class="card selected-card" style="display:none">
+      <div class="card-header">
+        <div>
+          <div class="msg-meta">
+            <div class="msg-avatar" id="selAvatar"></div>
+            <div>
+              <div class="msg-meta-name" id="selName"></div>
+              <div style="display:flex;gap:6px;margin-top:2px">
+                <span class="msg-meta-time" id="selTime"></span>
+                <span class="msg-meta-type" id="selType"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="msg-bubble" id="selContent"></div>
+
+      <div class="label">场合</div>
+      <div class="occasion-row" id="autoOccasionRow">
+        <button class="occasion-btn active" data-occasion="friend">朋友</button>
+        <button class="occasion-btn" data-occasion="work">工作群</button>
+        <button class="occasion-btn" data-occasion="family">家人</button>
+        <button class="occasion-btn" data-occasion="colleague">同事</button>
+        <button class="occasion-btn" data-occasion="stranger">陌生人</button>
+      </div>
+
+      <div class="label">我现在想...</div>
+      <div class="goal-row" id="autoGoalRow">
+        <button class="goal-btn" data-goal="agree">答应</button>
+        <button class="goal-btn" data-goal="decline">婉拒</button>
+        <button class="goal-btn" data-goal="advance">推进</button>
+        <button class="goal-btn" data-goal="maintain">维持关系</button>
+        <button class="goal-btn active" data-goal="casual">随便回</button>
+      </div>
+
+      <button class="btn-primary" id="analyzeBtn" onclick="analyzeSelected()">生成回复建议</button>
+    </div>
+
+    <!-- 骨架屏（加载中） -->
+    <div id="loadingCard" style="display:none">
+      <div class="card">
+        <div class="sk-line short skeleton"></div>
+        <div class="sk-line mid skeleton"></div>
+        <div class="sk-line full skeleton"></div>
+      </div>
+      <div class="card">
+        <div class="sk-line short skeleton" style="margin-bottom:12px"></div>
+        <div class="sk-block skeleton"></div>
+        <div class="sk-block skeleton"></div>
+      </div>
+    </div>
+
+    <!-- 分析结果 -->
+    <div id="result" style="display:none">
+
+      <!-- 局势分析 -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">局势分析</div>
+        <div class="scene-tags" id="sceneTags"></div>
+        <div class="analysis-text" id="analysisText"></div>
+        <div id="weaknessTip"></div>
+        <div id="frameworkTip"></div>
+      </div>
+
+      <!-- 回复建议 -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">回复建议</span>
+          <span class="card-badge" id="repliesCount"></span>
+        </div>
+        <div id="repliesContainer"></div>
+      </div>
+
+      <!-- 建议避免 -->
+      <div class="card" id="avoidCard" style="display:none">
+        <div class="card-title" style="margin-bottom:10px">建议避免说</div>
+        <div id="avoidContainer"></div>
+      </div>
+
+    </div>
+
   </div>
 </div>
 
 <script>
   let ws = null
   let messages = []
-  let selectedGoal = 'casual'
   let selectedMessage = null
   let isAutoMode = true
+  let selectedGoal = 'casual'
+  let selectedOccasion = 'friend'
+  let statReceived = 0
+  let statAnalyzed = 0
+
+  const INTENT_LABELS = {
+    criticism: '批评', conflict: '冲突', request: '请求', negotiation: '协商',
+    emotional: '情绪化', invitation: '邀约', persuasion: '说服', workplace: '职场',
+    casual: '日常', disagreement: '分歧', demand: '催促'
+  }
+  const EMOTION_STYLES = {
+    neutral: { label: '情绪平稳', cls: '' },
+    positive: { label: '态度积极', cls: '' },
+    negative: { label: '情绪消极', cls: 'negative' },
+    urgent: { label: '情绪紧张', cls: 'urgent' },
+  }
 
   // 模式切换
   document.getElementById('modeToggle').addEventListener('change', (e) => {
     isAutoMode = e.target.checked
     document.getElementById('autoLabel').classList.toggle('active', isAutoMode)
     document.getElementById('manualLabel').classList.toggle('active', !isAutoMode)
-    document.getElementById('autoMode').style.display = isAutoMode ? 'block' : 'none'
-    document.getElementById('manualMode').classList.toggle('active', !isAutoMode)
-
+    document.getElementById('autoPanel').style.display = isAutoMode ? 'block' : 'none'
+    document.getElementById('manualPanel').style.display = isAutoMode ? 'none' : 'block'
+    resetRight()
     if (!isAutoMode) {
-      // 切换到手动模式时断开 WebSocket
       if (ws) ws.close()
     } else {
-      // 切换到自动模式时重新连接
       connectWebSocket()
     }
   })
 
-  // 目标选择
-  document.querySelectorAll('.goal-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'))
-      btn.classList.add('active')
-      selectedGoal = btn.dataset.goal
+  // 场合 & 目标按钮通用绑定
+  function bindBtns(rowId, onChange) {
+    document.querySelectorAll(`#${rowId} button`).forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll(`#${rowId} button`).forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        onChange(btn.dataset.occasion || btn.dataset.goal)
+      })
     })
-  })
+  }
+  bindBtns('manualOccasionRow', v => selectedOccasion = v)
+  bindBtns('manualGoalRow', v => selectedGoal = v)
+  bindBtns('autoOccasionRow', v => selectedOccasion = v)
+  bindBtns('autoGoalRow', v => selectedGoal = v)
 
-  // WebSocket 连接
+  // WebSocket
   function connectWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `${protocol}//${window.location.host}`
-
-    ws = new WebSocket(wsUrl)
-
-    ws.onopen = () => {
-      console.log('WebSocket connected')
-      document.getElementById('statusBadge').className = 'status-badge connected'
-      document.getElementById('statusBadge').textContent = '已连接'
-    }
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected')
-      document.getElementById('statusBadge').className = 'status-badge disconnected'
-      document.getElementById('statusBadge').textContent = '未连接'
-
-      // 自动重连
-      if (isAutoMode) {
-        setTimeout(connectWebSocket, 3000)
-      }
-    }
-
-    ws.onerror = (err) => {
-      console.error('WebSocket error:', err)
-    }
-
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data)
-
-      if (msg.type === 'new_message') {
-        addMessage(msg.data)
-      }
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+    ws = new WebSocket(`${protocol}//${location.host}`)
+    ws.onopen = () => setStatus(true)
+    ws.onclose = () => { setStatus(false); if (isAutoMode) setTimeout(connectWebSocket, 3000) }
+    ws.onerror = () => setStatus(false)
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data)
+      if (msg.type === 'new_message') receiveMessage(msg.data)
     }
   }
 
-  // 添加新消息
-  function addMessage(msg) {
-    // 避免重复
-    if (messages.find(m => m.id === msg.id)) return
+  function setStatus(connected) {
+    document.getElementById('statusDot').className = 'status-dot' + (connected ? ' connected' : '')
+    document.getElementById('statusText').textContent = connected ? '已连接' : '未连接'
+  }
 
+  // 接收新消息
+  function receiveMessage(msg) {
+    if (messages.find(m => m.id === msg.id)) return
     messages.unshift(msg)
+    statReceived++
+    document.getElementById('statReceived').textContent = statReceived
     renderMessages()
+    // 如果用户不在顶部则显示"有新消息"提示
+    const container = document.getElementById('messagesContainer')
+    if (container.scrollTop > 60) {
+      document.getElementById('unreadBadge').style.display = 'inline-block'
+    }
   }
 
   // 渲染消息列表
   function renderMessages() {
+    document.getElementById('unreadBadge').style.display = 'none'
     const container = document.getElementById('messagesContainer')
-
     if (messages.length === 0) {
-      container.innerHTML = '<div class="empty-state">等待新消息...</div>'
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div>等待 WeFlow 推送新消息...<br><span style="font-size:11px">确保 WeFlow HTTP API 服务已开启</span></div>'
       return
     }
-
     container.innerHTML = messages.map(msg => {
-      const time = new Date(msg.timestamp).toLocaleString('zh-CN', {
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-      const isSelected = selectedMessage && selectedMessage.id === msg.id
-
+      const time = new Date(msg.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+      const isSelected = selectedMessage?.id === msg.id
+      const initial = (msg.contactName || '?')[0].toUpperCase()
+      const color = avatarColor(msg.contactId)
+      const isGroup = msg.contactName?.includes(' - ')
+      const [groupOrName, sender] = isGroup ? msg.contactName.split(' - ') : [msg.contactName, '']
       return `
-        <div class="message-item ${isSelected ? 'selected' : ''}" onclick="selectMessage('${msg.id}')">
-          <div class="message-header">
-            <span class="message-contact">${escapeHtml(msg.contactName)}</span>
-            <span class="message-time">${time}</span>
+        <div class="msg-item ${isSelected ? 'selected' : ''}" onclick="selectMessage('${escapeAttr(msg.id)}')">
+          <div class="msg-avatar" style="background:${color}">${initial}</div>
+          <div class="msg-body">
+            <div class="msg-top">
+              <span class="msg-name">${escapeHtml(isGroup ? groupOrName : msg.contactName)}</span>
+              <span class="msg-time">${time}</span>
+            </div>
+            ${isGroup ? `<span class="msg-group-tag">${escapeHtml(sender)}</span>` : ''}
+            <div class="msg-preview">${escapeHtml(msg.content)}</div>
           </div>
-          <div class="message-content">${escapeHtml(msg.content)}</div>
-        </div>
-      `
+        </div>`
     }).join('')
   }
 
-  // 自动模式目标选择
-  document.querySelectorAll('#autoGoalRow .goal-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#autoGoalRow .goal-btn').forEach(b => b.classList.remove('active'))
-      btn.classList.add('active')
-      selectedGoal = btn.dataset.goal
-    })
-  })
+  function avatarColor(id) {
+    const colors = ['#07c160','#1677ff','#fa8c16','#722ed1','#eb2f96','#13c2c2']
+    let h = 0; for (let c of (id||'')) h = (h*31 + c.charCodeAt(0)) & 0xffff
+    return colors[h % colors.length]
+  }
 
-  // 选择消息（只高亮，不自动分析）
+  // 选中消息（只展示，不分析）
   function selectMessage(msgId) {
     selectedMessage = messages.find(m => m.id === msgId)
     if (!selectedMessage) return
-
     renderMessages()
+    resetRight()
 
-    // 右侧显示选中消息，等待用户点击分析
-    document.getElementById('placeholder').style.display = 'none'
-    document.getElementById('result').style.display = 'none'
+    const msg = selectedMessage
+    const isGroup = msg.contactName?.includes(' - ')
+    const [groupOrName, sender] = isGroup ? msg.contactName.split(' - ') : [msg.contactName, '']
+    const initial = (msg.contactName || '?')[0].toUpperCase()
+    const color = avatarColor(msg.contactId)
+
+    document.getElementById('selAvatar').textContent = initial
+    document.getElementById('selAvatar').style.background = color
+    document.getElementById('selName').textContent = isGroup ? groupOrName : msg.contactName
+    document.getElementById('selTime').textContent = new Date(msg.timestamp).toLocaleString('zh-CN')
+    document.getElementById('selType').textContent = isGroup ? '群聊' : '私聊'
+    document.getElementById('selContent').textContent = msg.content
+
     document.getElementById('selectedCard').style.display = 'block'
-    document.getElementById('selectedContent').textContent = selectedMessage.content
-    document.getElementById('analyzeBtn').disabled = false
-    document.getElementById('analyzeBtn').textContent = '生成回复建议'
   }
 
-  // 点击按钮后才触发分析
+  // 分析（自动模式）
   async function analyzeSelected() {
     if (!selectedMessage) return
     const btn = document.getElementById('analyzeBtn')
     btn.disabled = true
-    btn.textContent = '生成中...'
+    btn.textContent = '分析中...'
     document.getElementById('selectedCard').style.display = 'none'
-    await generateReply(selectedMessage.contactId, selectedMessage.content)
+    await doGenerate(selectedMessage.contactId, selectedMessage.content)
+    btn.disabled = false
+    btn.textContent = '生成回复建议'
   }
 
-  // 生成回复建议
-  async function generateReply(contactId, message) {
+  // 手动模式提交
+  async function submitManual() {
+    const message = document.getElementById('manualMessage').value.trim()
+    if (!message) { alert('请粘贴对方的消息内容'); return }
+    const btn = document.getElementById('submitBtn')
+    btn.disabled = true
+    btn.textContent = '分析中...'
+    resetRight()
+    await doGenerate('manual', message)
+    btn.disabled = false
+    btn.textContent = '生成回复建议'
+  }
+
+  // 核心：调用 API 生成回复
+  async function doGenerate(contactId, message) {
     document.getElementById('placeholder').style.display = 'none'
+    document.getElementById('loadingCard').style.display = 'block'
     document.getElementById('result').style.display = 'none'
 
     try {
       const res = await fetch('/api/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contactId, message, goal: selectedGoal })
+        body: JSON.stringify({ contactId, message, goal: selectedGoal, occasion: selectedOccasion })
       })
       const data = await res.json()
+      document.getElementById('loadingCard').style.display = 'none'
       if (data.ok) {
+        statAnalyzed++
+        document.getElementById('statAnalyzed').textContent = statAnalyzed
         renderResult(data.result)
       } else {
         alert('生成失败：' + data.error)
+        resetRight()
       }
     } catch (e) {
-      alert('请求失败，请检查服务是否启动')
+      document.getElementById('loadingCard').style.display = 'none'
+      alert('请求失败，请检查服务是否正常运行')
+      resetRight()
     }
   }
 
-  // 手动模式提交
-  async function submitManual() {
-    const contactId = document.getElementById('contactId').value.trim()
-    const message = document.getElementById('message').value.trim()
-    if (!contactId || !message) { alert('请填写联系人 ID 和消息内容'); return }
-
-    const btn = document.getElementById('submitBtn')
-    btn.disabled = true
-    btn.textContent = '生成中...'
+  function resetRight() {
+    document.getElementById('placeholder').style.display = 'block'
+    document.getElementById('selectedCard').style.display = 'none'
+    document.getElementById('loadingCard').style.display = 'none'
     document.getElementById('result').style.display = 'none'
-    document.getElementById('placeholder').style.display = 'none'
-
-    try {
-      await generateReply(contactId, message)
-    } finally {
-      btn.disabled = false
-      btn.textContent = '生成回复建议'
-    }
   }
 
   function renderResult(r) {
+    // 场景标签
+    const tags = document.getElementById('sceneTags')
+    tags.innerHTML = ''
+    if (r.intent) {
+      const span = document.createElement('span')
+      span.className = 'scene-tag intent'
+      span.textContent = INTENT_LABELS[r.intent] || r.intent
+      tags.appendChild(span)
+    }
+    if (r.emotion) {
+      const e = EMOTION_STYLES[r.emotion] || { label: r.emotion, cls: '' }
+      const span = document.createElement('span')
+      span.className = `scene-tag emotion ${e.cls}`
+      span.textContent = e.label
+      tags.appendChild(span)
+    }
+
     document.getElementById('analysisText').textContent = r.situationAnalysis || ''
 
     const weaknessTip = document.getElementById('weaknessTip')
-    weaknessTip.innerHTML = r.weaknessTip ? `<div class="tip">注意：${r.weaknessTip}</div>` : ''
+    weaknessTip.innerHTML = r.weaknessTip
+      ? `<div class="tip-box warn">⚠️ ${escapeHtml(r.weaknessTip)}</div>` : ''
 
     const frameworkTip = document.getElementById('frameworkTip')
-    frameworkTip.innerHTML = r.frameworkTip ? `<div class="framework-tip">${r.frameworkTip}</div>` : ''
+    frameworkTip.innerHTML = r.frameworkTip
+      ? `<div class="tip-box info">💡 ${escapeHtml(r.frameworkTip)}</div>` : ''
 
-    const repliesContainer = document.getElementById('repliesContainer')
-    repliesContainer.innerHTML = r.replies.map(reply => `
+    // 回复建议
+    document.getElementById('repliesCount').textContent = `${r.replies?.length || 0} 条`
+    document.getElementById('repliesContainer').innerHTML = (r.replies || []).map(reply => `
       <div class="reply-item ${reply.isRecommended ? 'recommended' : ''}">
-        ${reply.isRecommended ? '<span class="reply-badge">推荐</span>' : ''}
-        <button class="copy-btn" onclick="copyText(this, '${escapeAttr(reply.text)}')">复制</button>
+        <div class="reply-header">
+          <div class="reply-tags">
+            ${reply.isRecommended ? '<span class="reply-tag rec">推荐</span>' : ''}
+            ${reply.tone ? `<span class="reply-tag">${escapeHtml(reply.tone)}</span>` : ''}
+          </div>
+          <button class="copy-btn" onclick="copyText(this, '${escapeAttr(reply.text)}')">复制</button>
+        </div>
         <div class="reply-text">${escapeHtml(reply.text)}</div>
-        <div class="reply-reason">${escapeHtml(reply.direction)}</div>
+        <div class="reply-reason">${escapeHtml(reply.direction || '')}</div>
       </div>
     `).join('')
 
-    const avoidContainer = document.getElementById('avoidContainer')
-    if (r.avoid && r.avoid.length > 0) {
-      avoidContainer.innerHTML = r.avoid.map(a => `
+    // 避免说
+    if (r.avoid?.length > 0) {
+      document.getElementById('avoidContainer').innerHTML = r.avoid.map(a => `
         <div class="avoid-item">
-          <span class="avoid-text">"${escapeHtml(a.text)}"</span>
-          <span class="avoid-reason"> → ${escapeHtml(a.reason)}</span>
+          <span class="avoid-label">✗</span>
+          <div><span style="color:#ff4d4f;font-weight:500">"${escapeHtml(a.text)}"</span><span class="avoid-reason"> — ${escapeHtml(a.reason)}</span></div>
         </div>
       `).join('')
-      document.getElementById('avoidCard').style.display = ''
+      document.getElementById('avoidCard').style.display = 'block'
     } else {
       document.getElementById('avoidCard').style.display = 'none'
     }
 
     document.getElementById('result').style.display = 'block'
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   function copyText(btn, text) {
@@ -394,6 +590,10 @@
     })
   }
 
+  function updateCharCount(el) {
+    document.getElementById('charCount').textContent = el.value.length
+  }
+
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
   }
@@ -401,10 +601,7 @@
     return String(s).replace(/'/g, "\\'").replace(/\n/g, ' ')
   }
 
-  // 启动时自动连接
-  if (isAutoMode) {
-    connectWebSocket()
-  }
+  connectWebSocket()
 </script>
 </body>
 </html>
