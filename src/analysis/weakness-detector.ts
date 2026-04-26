@@ -1,4 +1,4 @@
-import { Message, WeaknessId } from '../types'
+import { Message, Occasion, WeaknessId } from '../types'
 
 interface AnomalyEvent {
   type: 'recall' | 'burst' | 'long_reply' | 'long_silence' | 'contact_went_cold' | 'defensive'
@@ -71,10 +71,12 @@ export function detectAnomalies(messages: Message[]): AnomalyEvent[] {
   return events
 }
 
-interface WeaknessCandidacy {
+export interface WeaknessCandidacy {
   id: WeaknessId
   count: number
   examples: string[]
+  confidence?: number
+  interpretation?: string
 }
 
 // 从异常事件推断弱项
@@ -121,11 +123,27 @@ export function inferWeaknesses(messages: Message[]): WeaknessCandidacy[] {
   const avoidCount = (allText.match(/随便|都行|无所谓|你说吧/gi) || []).length
   if (avoidCount > userMessages.length * 0.1) inc('W08')
 
+  // W06: 情感生硬 — 用户发关心消息后对方回复冷淡（极短且无正面情绪）
+  const caringPattern = /辛苦了|注意身体|好好休息|保重|加油|还好吗|没事吧|怎么了|你还好/
+  for (let i = 0; i < messages.length - 1; i++) {
+    const msg = messages[i]
+    if (msg.sender !== 'user' || !caringPattern.test(msg.content)) continue
+    const nextContact = messages.slice(i + 1, i + 4).find(m => m.sender === 'contact')
+    if (
+      nextContact &&
+      nextContact.content.length <= 8 &&
+      !/谢谢|感谢|❤|😊|感动|暖|哈哈|哦/.test(nextContact.content)
+    ) {
+      inc('W06', msg.content)
+    }
+  }
+
   return Object.values(countMap).filter(w => w.count >= 5) as WeaknessCandidacy[]
 }
 
 // 分析用户风格
-export function analyzeStyle(messages: Message[]) {
+// occasionMap: contactId → occasion，用于按场合拆分风格数据
+export function analyzeStyle(messages: Message[], occasionMap?: Record<string, Occasion>) {
   const userMessages = messages.filter(m => m.sender === 'user' && m.content.length > 0)
   if (userMessages.length === 0) return null
 
@@ -151,5 +169,25 @@ export function analyzeStyle(messages: Message[]) {
 
   const usePeriod = userMessages.filter(m => m.content.endsWith('。')).length > userMessages.length * 0.3
 
-  return { avgLength, commonWords, emojiFrequency, usePeriod }
+  // 按场合拆分风格数据
+  const byOccasion: Partial<Record<Occasion, { avgLength: number; emojiFrequency: 'rare' | 'medium' | 'high' }>> = {}
+  if (occasionMap) {
+    const occGroups: Partial<Record<Occasion, Message[]>> = {}
+    for (const m of userMessages) {
+      const occ = occasionMap[m.contactId]
+      if (!occ) continue
+      if (!occGroups[occ]) occGroups[occ] = []
+      occGroups[occ]!.push(m)
+    }
+    for (const [occ, msgs] of Object.entries(occGroups) as [Occasion, Message[]][]) {
+      if (msgs.length < 3) continue
+      const occAvgLen = Math.round(msgs.reduce((s, m) => s + m.content.length, 0) / msgs.length)
+      const occEmojis = (msgs.map(m => m.content).join('').match(/[\u{1F300}-\u{1FFFF}]/gu) || []).length
+      const occEmojiFreq: 'rare' | 'medium' | 'high' = occEmojis > msgs.length * 0.3 ? 'high'
+        : occEmojis > msgs.length * 0.1 ? 'medium' : 'rare'
+      byOccasion[occ] = { avgLength: occAvgLen, emojiFrequency: occEmojiFreq }
+    }
+  }
+
+  return { avgLength, commonWords, emojiFrequency, usePeriod, byOccasion }
 }

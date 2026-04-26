@@ -67,7 +67,7 @@ app.get('/api/profile', (_req, res) => {
 app.post('/api/profile/analyze', async (_req, res) => {
   try {
     const messages = await exportAllMessages()
-    const report = buildProfile(messages)
+    const report = await buildProfile(messages)
     res.json({ ok: true, report })
   } catch (err) {
     res.status(500).json({ error: 'Analysis failed' })

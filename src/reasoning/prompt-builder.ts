@@ -29,6 +29,12 @@ export function buildPrompt(message: string, ctx: ContextPackage): string {
 ${ctx.skill.content}
 ` : ''
 
+  const preferencesSection = (ctx.preferredDirections.length > 0 || ctx.avoidedDirections.length > 0) ? `
+[历史偏好（基于你过去的选择）]
+${ctx.preferredDirections.length > 0 ? '你过去倾向选这类方向：' + ctx.preferredDirections.map(d => `"${d}"`).join('、') : ''}
+${ctx.avoidedDirections.length > 0 ? '你过去觉得不像自己的方向：' + ctx.avoidedDirections.map(d => `"${d}"`).join('、') : ''}
+` : ''
+
   return `你是用户的沟通助手。根据以下完整上下文，生成回复建议。
 
 [用户画像]
@@ -50,7 +56,7 @@ ${historyText || '（无历史记录）'}
 
 [用户目标]
 ${GOAL_LABELS[ctx.userGoal] || '随便回一下'}
-${skillSection}
+${skillSection}${preferencesSection}
 [要求]
 - 回复必须符合用户的说话风格（参考最佳状态样本的语气、长度、用词）
 - 不要用"当然、非常、您好、感谢、明白了、没问题、我会尽快、温馨提示、欢迎随时、请您"等词

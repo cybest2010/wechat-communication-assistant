@@ -93,6 +93,8 @@ export interface ContextPackage {
   samples: string[]
   userGoal: UserGoal
   skill: Skill | null
+  preferredDirections: string[]
+  avoidedDirections: string[]
 }
 
 export interface ReplyOption {

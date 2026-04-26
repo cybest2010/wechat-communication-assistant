@@ -1,5 +1,5 @@
 import { ContextPackage, IntentResult, UserGoal, Message, Occasion } from '../types'
-import { getProfile, getContact, getSamples } from '../data/storage'
+import { getProfile, getContact, getSamples, getScenePreferences } from '../data/storage'
 import { getHistoryMessages } from '../data/weflow-client'
 import { extractIntent } from './intent-extractor'
 import { routeSkill, shouldSkipRouting } from '../skill/skill-router'
@@ -25,16 +25,25 @@ export async function buildContext(
     skill = routeSkill(intent, profile.weaknesses, occasion)
   }
 
-  // 匹配场景样本
-  const sceneMap: Record<string, string> = {
+  // 匹配场景样本：优先按用户目标选择，其次按意图类型
+  const intentSceneMap: Record<string, string> = {
     request: 'rejection',
     invitation: 'rejection',
     emotional: 'emotional',
     workplace: 'workplace',
     criticism: 'workplace',
+    negotiation: 'casual',
+    disagreement: 'casual',
   }
-  const sampleScene = sceneMap[intent.intent] || 'casual'
+  const goalSceneOverride: Partial<Record<string, string>> = {
+    agree: 'agreement',
+    decline: 'rejection',
+  }
+  const sampleScene = goalSceneOverride[userGoal] || intentSceneMap[intent.intent] || 'casual'
   const samples = getSamples(sampleScene).slice(0, 5)
+
+  // 加载该场景的历史偏好方向（反馈闭环）
+  const { preferred, avoided } = getScenePreferences(sampleScene)
 
   const ctx: ContextPackage = {
     occasion,
@@ -44,6 +53,8 @@ export async function buildContext(
     samples,
     userGoal,
     skill,
+    preferredDirections: preferred,
+    avoidedDirections: avoided,
   }
   return { ctx, intent }
 }

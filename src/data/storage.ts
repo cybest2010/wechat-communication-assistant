@@ -115,3 +115,34 @@ export function addFeedback(entry: FeedbackEntry) {
 export function getFeedbackHistory(): FeedbackEntry[] {
   return readJson<FeedbackEntry[]>(FEEDBACK_PATH, [])
 }
+
+// 根据反馈历史推断某场景下用户倾向选择/不选的回复方向
+// 实现「长期不复制某方向 → 降低该方向在此场景权重」的反馈闭环
+export function getScenePreferences(scene: string): { preferred: string[]; avoided: string[] } {
+  const history = getFeedbackHistory()
+
+  // 统计该场景下各方向被选中的次数
+  const dirCount: Record<string, number> = {}
+  for (const entry of history) {
+    if (entry.scene !== scene || entry.notLikeMe || !entry.chosenDirection) continue
+    dirCount[entry.chosenDirection] = (dirCount[entry.chosenDirection] || 0) + 1
+  }
+
+  // 出现 2 次以上的方向视为用户偏好方向
+  const preferred = Object.entries(dirCount)
+    .filter(([, count]) => count >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([dir]) => dir)
+
+  // 被明确标记「不像我」的方向视为应避免方向
+  const avoidedSet = new Set<string>()
+  for (const entry of history) {
+    if (entry.scene === scene && entry.notLikeMe && entry.chosenDirection) {
+      avoidedSet.add(entry.chosenDirection)
+    }
+  }
+  const avoided = [...avoidedSet].slice(0, 3)
+
+  return { preferred, avoided }
+}
