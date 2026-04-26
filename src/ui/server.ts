@@ -110,7 +110,7 @@ app.get('/api/skills', (_req, res) => {
 // --- 监听器控制 ---
 
 app.post('/api/listener/start', (_req, res) => {
-  messageListener.start(2000)
+  messageListener.start()
   res.json({ ok: true })
 })
 
@@ -161,8 +161,8 @@ export function startServer(port = 8080) {
     })
   })
 
-  // 启动轮询（2秒一次）
-  messageListener.start(2000)
+  // 连接 WeFlow SSE 推送
+  messageListener.start()
 
   server.listen(port, () => {
     console.log(`[Server] Running at http://localhost:${port}`)
