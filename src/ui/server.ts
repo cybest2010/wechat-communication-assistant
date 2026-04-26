@@ -5,7 +5,7 @@ import { createServer } from 'http'
 import { generateReplies } from '../reasoning/assistant'
 import { buildProfile, confirmWeakness, dismissWeakness } from '../analysis/profile-builder'
 import { getProfile, saveContact, getContact, getAllContacts, addFeedback, addSample } from '../data/storage'
-import { exportAllMessages } from '../data/weflow-client'
+import { exportAllMessages, getContacts } from '../data/weflow-client'
 import { registry } from '../skill/skill-registry'
 import { UserGoal, WeaknessId, Occasion, RelationshipType, RelationshipStatus } from '../types'
 // Occasion type used for request body typing (passed through to generateReplies)
@@ -56,6 +56,34 @@ app.post('/api/contacts', (req, res) => {
     confirmedAt: new Date().toISOString(),
   })
   res.json({ ok: true })
+})
+
+// 从 WeFlow 同步联系人列表（跳过已存在的，新联系人默认 friend 场合）
+app.post('/api/contacts/sync', async (_req, res) => {
+  try {
+    const weflowContacts = await getContacts()
+    const existing = getAllContacts()
+    const existingIds = new Set(existing.map(c => c.id))
+
+    let added = 0
+    for (const wc of weflowContacts) {
+      if (existingIds.has(wc.id)) continue
+      saveContact({
+        id: wc.id,
+        name: wc.alias || wc.name,
+        occasion: (wc.isRoom ? 'workplace' : 'friend') as Occasion,
+        relationshipType: (wc.isRoom ? 'peer' : 'friend') as RelationshipType,
+        relationshipStatus: 'normal',
+        recentContext: '',
+        confirmedAt: new Date().toISOString(),
+      })
+      added++
+    }
+    res.json({ ok: true, total: weflowContacts.length, added })
+  } catch (err) {
+    console.error('/api/contacts/sync error:', err)
+    res.status(500).json({ error: 'Sync failed' })
+  }
 })
 
 // --- 画像 ---

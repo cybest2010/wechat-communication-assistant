@@ -26,6 +26,7 @@ export interface WeFlowSSEMessage {
 export interface WeFlowHistoryMessage {
   localId: string
   serverId?: string
+  sessionId?: string        // 全量导出时由 API 附带，用于与 getHistoryMessages 保持一致
   createTime: number        // 秒级 Unix 时间戳
   isSend: boolean           // true = 自己发的
   senderUsername: string
@@ -76,6 +77,8 @@ export async function getHistoryMessages(sessionId: string, limit = 20): Promise
 }
 
 // 导出全量历史消息（用于初始化分析）
+// contactId 优先级：传入的 sessionId > 消息自带的 sessionId > senderUsername（兜底）
+// 保证与 getHistoryMessages 使用相同的 contactId，使 byOccasion 分析能正确关联联系人
 export async function exportAllMessages(sessionId?: string): Promise<Message[]> {
   try {
     const params = sessionId ? { sessionId } : {}
@@ -83,7 +86,7 @@ export async function exportAllMessages(sessionId?: string): Promise<Message[]> 
     const raw: WeFlowHistoryMessage[] = res.data?.messages ?? []
     return raw.map(m => ({
       id: m.localId,
-      contactId: sessionId || m.senderUsername,
+      contactId: sessionId ?? m.sessionId ?? m.senderUsername,
       contactName: m.senderUsername,
       content: m.content,
       sender: m.isSend ? 'user' : 'contact',

@@ -12,6 +12,11 @@ const GOAL_LABELS: Record<string, string> = {
 export function buildPrompt(message: string, ctx: ContextPackage): string {
   const profile = getProfile()
 
+  // 优先使用当前场合的专属风格数据，其次回退到全局数据
+  const occStyle = profile.style.byOccasion[ctx.occasion]
+  const effectiveAvgLength = occStyle?.avgLength ?? profile.style.avgLength
+  const effectiveEmojiFreq = occStyle?.emojiFrequency ?? profile.style.emojiFrequency
+
   const weaknessDesc = ctx.weaknesses.length > 0
     ? ctx.weaknesses.map(w => `${w} ${WEAKNESSES[w].name}：${WEAKNESSES[w].description}`).join('、')
     : '暂无已识别的沟通弱项'
@@ -38,7 +43,7 @@ ${ctx.avoidedDirections.length > 0 ? '你过去觉得不像自己的方向：' +
   return `你是用户的沟通助手。根据以下完整上下文，生成回复建议。
 
 [用户画像]
-风格特征：说话偏${profile.style.avgLength <= 10 ? '简短' : '正常'}，${profile.style.usePeriod ? '使用句号' : '不用句号'}，emoji 频率${profile.style.emojiFrequency}
+风格特征：说话偏${effectiveAvgLength <= 10 ? '简短' : '正常'}，${profile.style.usePeriod ? '使用句号' : '不用句号'}，${ctx.occasion} 场合下 emoji 频率${effectiveEmojiFreq}
 常用词：${profile.style.commonWords.slice(0, 10).join('、') || '暂无'}
 沟通弱项：${weaknessDesc}
 最佳状态样本（模仿这些风格，不要模仿弱点）：
@@ -61,7 +66,7 @@ ${skillSection}${preferencesSection}
 - 回复必须符合用户的说话风格（参考最佳状态样本的语气、长度、用词）
 - 不要用"当然、非常、您好、感谢、明白了、没问题、我会尽快、温馨提示、欢迎随时、请您"等词
 - 不要写得太完整工整，越自然越好
-- 每条回复控制在 ${Math.max(8, profile.style.avgLength + 5)} 字以内
+- 每条回复控制在 ${Math.max(8, effectiveAvgLength + 5)} 字以内
 
 请严格按以下格式输出，不要输出其他内容：
 

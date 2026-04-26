@@ -419,6 +419,7 @@
     </div>
     <div class="modal-foot" id="contactFoot">
       <button class="btn-ghost" onclick="closeModal('contactModal')">关闭</button>
+      <button class="btn-ghost" id="syncBtn" onclick="syncContacts()" style="margin-right:auto">↓ 从 WeFlow 导入</button>
     </div>
   </div>
 </div>
@@ -900,6 +901,25 @@ async function loadContacts() {
   const res = await fetch('/api/contacts')
   const data = await res.json()
   renderContactList(data.contacts || [])
+}
+
+async function syncContacts() {
+  const btn = document.getElementById('syncBtn')
+  btn.disabled = true; btn.textContent = '导入中...'
+  try {
+    const res = await fetch('/api/contacts/sync', { method: 'POST' })
+    const data = await res.json()
+    if (data.ok) {
+      const msg = data.added > 0 ? `导入完成，新增 ${data.added} 个联系人` : '已是最新，无新联系人'
+      btn.textContent = msg
+      if (data.added > 0) loadContacts()
+      setTimeout(() => { btn.textContent = '↓ 从 WeFlow 导入'; btn.disabled = false }, 2500)
+    } else {
+      btn.textContent = '导入失败'; btn.disabled = false
+    }
+  } catch {
+    btn.textContent = '导入失败'; btn.disabled = false
+  }
 }
 
 function renderContactList(contacts) {
