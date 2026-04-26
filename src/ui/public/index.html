@@ -316,6 +316,26 @@
         <div class="card-title" style="margin-bottom:10px">建议避免说</div>
         <div id="avoidList"></div>
       </div>
+
+      <!-- 操作栏 -->
+      <div class="card" style="padding:12px 16px">
+        <div id="adjustGoalRow" style="display:none;margin-bottom:12px">
+          <div class="lbl" style="margin-bottom:6px">重新选择目标后生成</div>
+          <div class="chip-row" id="regenGoalRow">
+            <button class="pill" data-v="agree">答应</button>
+            <button class="pill" data-v="decline">婉拒</button>
+            <button class="pill" data-v="advance">推进</button>
+            <button class="pill" data-v="maintain">维持关系</button>
+            <button class="pill on" data-v="casual">随便回</button>
+          </div>
+          <button class="btn" style="margin-top:0" onclick="regenWithNewGoal()">确认生成</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost" style="flex:1" onclick="regenReply()">↺ 重新生成</button>
+          <button class="btn-ghost" style="flex:1" onclick="toggleAdjustGoal()">🎯 调整目标</button>
+          <button class="btn-ghost" style="flex:1;color:#ff7a45;border-color:#ffbb96" onclick="notLikeMe()">🙅 这不像我</button>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -434,6 +454,7 @@ let occasion = 'friend'
 let statR = 0, statA = 0
 let currentReplies = []   // 当前显示的回复列表（用于复制）
 let currentScene = 'casual'  // 当前分析的场景（用于样本保存）
+let lastGenParams = null  // 上次生成的参数（用于重新生成）
 
 const INTENT = { criticism:'批评',conflict:'冲突',request:'请求',negotiation:'协商',emotional:'情绪化',invitation:'邀约',persuasion:'说服',workplace:'职场',casual:'日常',disagreement:'分歧',demand:'催促' }
 const COLORS = ['#07c160','#1677ff','#fa8c16','#722ed1','#eb2f96','#13c2c2','#f5222d']
@@ -476,6 +497,7 @@ bindGroup('mOccRow', v => occasion = v)
 bindGroup('mGoalRow', v => goal = v)
 bindGroup('aOccRow', v => occasion = v)
 bindGroup('aGoalRow', v => goal = v)
+bindGroup('regenGoalRow', v => goal = v)
 
 // ──────────────────────────────────────
 // WebSocket
@@ -585,6 +607,7 @@ async function submitManual() {
 // 核心：调用 API 生成回复
 // ──────────────────────────────────────
 async function doGenerate(contactId, message) {
+  lastGenParams = { contactId, message }
   document.getElementById('phCard').style.display = 'none'
   document.getElementById('skelCard').style.display = 'block'
   document.getElementById('resultWrap').style.display = 'none'
@@ -609,6 +632,42 @@ async function doGenerate(contactId, message) {
     alert('请求失败，请检查服务是否正常')
     resetRight()
   }
+}
+
+// ──────────────────────────────────────
+// 操作栏
+// ──────────────────────────────────────
+async function regenReply() {
+  if (!lastGenParams) return
+  document.getElementById('adjustGoalRow').style.display = 'none'
+  await doGenerate(lastGenParams.contactId, lastGenParams.message)
+}
+
+function toggleAdjustGoal() {
+  const row = document.getElementById('adjustGoalRow')
+  row.style.display = row.style.display === 'none' ? 'block' : 'none'
+}
+
+async function regenWithNewGoal() {
+  if (!lastGenParams) return
+  document.getElementById('adjustGoalRow').style.display = 'none'
+  await doGenerate(lastGenParams.contactId, lastGenParams.message)
+}
+
+async function notLikeMe() {
+  // 记录反馈
+  fetch('/api/feedback', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      contactId: lastGenParams?.contactId || 'manual',
+      scene: currentScene, intent: currentScene,
+      chosenDirection: '', wasRecommended: false, notLikeMe: true
+    })
+  }).catch(() => {})
+
+  // 重新生成
+  if (!lastGenParams) return
+  await doGenerate(lastGenParams.contactId, lastGenParams.message)
 }
 
 function resetRight() {
