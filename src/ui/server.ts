@@ -8,6 +8,7 @@ import { getProfile, saveContact, getContact, getAllContacts, addFeedback } from
 import { exportAllMessages } from '../data/weflow-client'
 import { registry } from '../skill/skill-registry'
 import { UserGoal, WeaknessId, Occasion, RelationshipType, RelationshipStatus } from '../types'
+// Occasion type used for request body typing (passed through to generateReplies)
 import { messageListener } from '../data/message-listener'
 
 const app = express()
@@ -18,10 +19,10 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.post('/api/suggest', async (req, res) => {
   try {
-    const { contactId, message, goal = 'casual' } = req.body
+    const { contactId, message, goal = 'casual', occasion } = req.body
     if (!contactId || !message) return res.status(400).json({ error: 'contactId and message required' })
 
-    const result = await generateReplies(contactId, message, goal as UserGoal)
+    const result = await generateReplies(contactId, message, goal as UserGoal, occasion || undefined)
     res.json({ ok: true, result })
   } catch (err) {
     console.error('/api/suggest error:', err)

@@ -99,6 +99,7 @@ export interface ReplyOption {
   text: string
   direction: string
   isRecommended: boolean
+  tone?: string
   reason?: string
 }
 
@@ -106,6 +107,8 @@ export interface AssistantResult {
   situationAnalysis: string
   weaknessTip: string | null
   frameworkTip: string | null
+  intent?: SceneType
+  emotion?: EmotionType
   replies: ReplyOption[]
   avoid: Array<{ text: string; reason: string }>
 }

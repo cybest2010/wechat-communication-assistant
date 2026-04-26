@@ -1,4 +1,4 @@
-import { ContextPackage, UserGoal, Message, Occasion } from '../types'
+import { ContextPackage, IntentResult, UserGoal, Message, Occasion } from '../types'
 import { getProfile, getContact, getSamples } from '../data/storage'
 import { getHistoryMessages } from '../data/weflow-client'
 import { extractIntent } from './intent-extractor'
@@ -7,11 +7,12 @@ import { routeSkill, shouldSkipRouting } from '../skill/skill-router'
 export async function buildContext(
   contactId: string,
   message: string,
-  userGoal: UserGoal
-): Promise<ContextPackage> {
+  userGoal: UserGoal,
+  occasionOverride?: Occasion
+): Promise<{ ctx: ContextPackage; intent: IntentResult }> {
   const profile = getProfile()
   const contact = getContact(contactId)
-  const occasion: Occasion = contact?.occasion || 'friend'
+  const occasion: Occasion = occasionOverride || contact?.occasion || 'friend'
 
   const history = await getHistoryMessages(contactId, 15)
 
@@ -35,7 +36,7 @@ export async function buildContext(
   const sampleScene = sceneMap[intent.intent] || 'casual'
   const samples = getSamples(sampleScene).slice(0, 5)
 
-  return {
+  const ctx: ContextPackage = {
     occasion,
     relationship: formatRelationship(contact),
     history,
@@ -44,6 +45,7 @@ export async function buildContext(
     userGoal,
     skill,
   }
+  return { ctx, intent }
 }
 
 function formatRelationship(contact: ReturnType<typeof getContact>): string {

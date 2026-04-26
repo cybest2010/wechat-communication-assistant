@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const AI_API_URL = process.env.AI_API_URL || 'https://api.anthropic.com'
+// 去掉末尾可能已含的 /v1，统一在下方拼接
+const AI_API_URL = (process.env.AI_API_URL || 'https://api.openai.com').replace(/\/v1\/?$/, '')
 const AI_API_KEY = process.env.AI_API_KEY || ''
 const AI_MODEL = process.env.AI_MODEL || 'claude-sonnet-4-6'
 

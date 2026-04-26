@@ -1,4 +1,4 @@
-import { AssistantResult, ContextPackage, ReplyOption, UserGoal } from '../types'
+import { AssistantResult, ContextPackage, Occasion, ReplyOption, UserGoal } from '../types'
 import { buildContext } from './context-builder'
 import { buildPrompt } from './prompt-builder'
 import { callAI } from './ai-client'
@@ -7,9 +7,10 @@ import { humanScore } from './human-checker'
 export async function generateReplies(
   contactId: string,
   message: string,
-  userGoal: UserGoal
+  userGoal: UserGoal,
+  occasionOverride?: Occasion
 ): Promise<AssistantResult> {
-  const ctx = await buildContext(contactId, message, userGoal)
+  const { ctx, intent } = await buildContext(contactId, message, userGoal, occasionOverride)
   const prompt = buildPrompt(message, ctx)
 
   let raw = ''
@@ -23,7 +24,7 @@ export async function generateReplies(
     attempts++
   }
 
-  return parseResult(raw, ctx)
+  return { ...parseResult(raw, ctx), intent: intent.intent, emotion: intent.emotion }
 }
 
 function parseResult(raw: string, ctx: ContextPackage): AssistantResult {
