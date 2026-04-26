@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>微信沟通助手</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f5f5f5; color: #333; }
+  .container { max-width: 680px; margin: 0 auto; padding: 20px; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #111; }
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .label { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .message-box { background: #f0f0f0; border-radius: 8px; padding: 12px; font-size: 15px; margin-bottom: 12px; }
+  .goal-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .goal-btn { border: 1.5px solid #ddd; background: #fff; border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .goal-btn.active { border-color: #07c160; background: #e8f9ee; color: #07c160; }
+  .goal-btn:hover { border-color: #07c160; }
+  textarea { width: 100%; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 10px; font-size: 14px; resize: vertical; min-height: 80px; outline: none; font-family: inherit; }
+  textarea:focus { border-color: #07c160; }
+  .btn { background: #07c160; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 10px; }
+  .btn:hover { background: #06ad56; }
+  .btn:disabled { background: #ccc; cursor: not-allowed; }
+  .analysis { font-size: 13px; color: #555; line-height: 1.6; padding: 10px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; }
+  .tip { font-size: 12px; color: #fa8c16; background: #fff7e6; border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; }
+  .framework-tip { font-size: 12px; color: #1677ff; background: #e6f4ff; border-radius: 6px; padding: 6px 10px; margin-bottom: 10px; }
+  .reply-item { border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 12px; margin-bottom: 8px; position: relative; }
+  .reply-item.recommended { border-color: #07c160; background: #f6ffed; }
+  .reply-badge { position: absolute; top: -8px; left: 12px; background: #07c160; color: #fff; font-size: 11px; padding: 1px 8px; border-radius: 10px; }
+  .reply-text { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .reply-reason { font-size: 12px; color: #888; }
+  .copy-btn { float: right; background: #f0f0f0; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; margin-top: -2px; }
+  .copy-btn:hover { background: #e0e0e0; }
+  .copy-btn.copied { background: #d4edda; color: #28a745; }
+  .avoid-item { font-size: 13px; color: #666; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+  .avoid-item:last-child { border-bottom: none; }
+  .avoid-text { color: #ff4d4f; font-weight: 500; }
+  .avoid-reason { color: #999; }
+  .section-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
+  .contact-input { display: flex; gap: 8px; margin-bottom: 12px; }
+  .contact-input input { flex: 1; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; }
+  .contact-input input:focus { border-color: #07c160; }
+  .loading { text-align: center; color: #888; padding: 20px; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>微信沟通助手</h1>
+
+  <div class="card">
+    <div class="label">联系人 ID（微信 ID 或群 ID）</div>
+    <div class="contact-input">
+      <input id="contactId" type="text" placeholder="输入联系人 ID" />
+    </div>
+
+    <div class="label">对方发来的消息</div>
+    <textarea id="message" placeholder="粘贴对方的消息..."></textarea>
+
+    <div class="label" style="margin-top:12px">我现在想...</div>
+    <div class="goal-row" id="goalRow">
+      <button class="goal-btn" data-goal="agree">答应</button>
+      <button class="goal-btn" data-goal="decline">婉拒</button>
+      <button class="goal-btn" data-goal="advance">推进</button>
+      <button class="goal-btn" data-goal="maintain">维持关系</button>
+      <button class="goal-btn active" data-goal="casual">随便回</button>
+    </div>
+
+    <button class="btn" id="submitBtn" onclick="submit()">生成回复建议</button>
+  </div>
+
+  <div id="result" style="display:none">
+    <div class="card" id="analysisCard">
+      <div class="section-title">局势分析</div>
+      <div class="analysis" id="analysisText"></div>
+      <div id="weaknessTip"></div>
+      <div id="frameworkTip"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">回复建议</div>
+      <div id="repliesContainer"></div>
+    </div>
+
+    <div class="card" id="avoidCard">
+      <div class="section-title">建议避免</div>
+      <div id="avoidContainer"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedGoal = 'casual'
+
+  document.querySelectorAll('.goal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      selectedGoal = btn.dataset.goal
+    })
+  })
+
+  async function submit() {
+    const contactId = document.getElementById('contactId').value.trim()
+    const message = document.getElementById('message').value.trim()
+    if (!contactId || !message) { alert('请填写联系人 ID 和消息内容'); return }
+
+    const btn = document.getElementById('submitBtn')
+    btn.disabled = true
+    btn.textContent = '生成中...'
+    document.getElementById('result').style.display = 'none'
+
+    try {
+      const res = await fetch('/api/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contactId, message, goal: selectedGoal })
+      })
+      const data = await res.json()
+      if (data.ok) renderResult(data.result)
+      else alert('生成失败：' + data.error)
+    } catch (e) {
+      alert('请求失败，请检查服务是否启动')
+    } finally {
+      btn.disabled = false
+      btn.textContent = '生成回复建议'
+    }
+  }
+
+  function renderResult(r) {
+    document.getElementById('analysisText').textContent = r.situationAnalysis || ''
+
+    const weaknessTip = document.getElementById('weaknessTip')
+    weaknessTip.innerHTML = r.weaknessTip ? `<div class="tip">注意：${r.weaknessTip}</div>` : ''
+
+    const frameworkTip = document.getElementById('frameworkTip')
+    frameworkTip.innerHTML = r.frameworkTip ? `<div class="framework-tip">${r.frameworkTip}</div>` : ''
+
+    const repliesContainer = document.getElementById('repliesContainer')
+    repliesContainer.innerHTML = r.replies.map(reply => `
+      <div class="reply-item ${reply.isRecommended ? 'recommended' : ''}">
+        ${reply.isRecommended ? '<span class="reply-badge">推荐</span>' : ''}
+        <button class="copy-btn" onclick="copyText(this, '${escapeAttr(reply.text)}')">复制</button>
+        <div class="reply-text">${escapeHtml(reply.text)}</div>
+        <div class="reply-reason">${escapeHtml(reply.direction)}</div>
+      </div>
+    `).join('')
+
+    const avoidContainer = document.getElementById('avoidContainer')
+    if (r.avoid && r.avoid.length > 0) {
+      avoidContainer.innerHTML = r.avoid.map(a => `
+        <div class="avoid-item">
+          <span class="avoid-text">"${escapeHtml(a.text)}"</span>
+          <span class="avoid-reason"> → ${escapeHtml(a.reason)}</span>
+        </div>
+      `).join('')
+      document.getElementById('avoidCard').style.display = ''
+    } else {
+      document.getElementById('avoidCard').style.display = 'none'
+    }
+
+    document.getElementById('result').style.display = 'block'
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth' })
+  }
+
+  function copyText(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '已复制'
+      btn.classList.add('copied')
+      setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied') }, 1500)
+    })
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+  }
+  function escapeAttr(s) {
+    return String(s).replace(/'/g, "\\'").replace(/\n/g, ' ')
+  }
+</script>
+</body>
+</html>
