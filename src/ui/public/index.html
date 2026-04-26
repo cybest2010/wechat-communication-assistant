@@ -8,600 +8,916 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
 
-  /* 顶栏 */
-  .topbar { background: #fff; border-bottom: 1px solid #eee; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .topbar-left { display: flex; align-items: center; gap: 16px; }
-  .logo { font-size: 16px; font-weight: 700; color: #111; }
+  /* ── 顶栏 ── */
+  .topbar { background: #fff; border-bottom: 1px solid #eee; padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .logo { font-size: 15px; font-weight: 700; color: #111; }
   .logo span { color: #07c160; }
-  .stats { display: flex; gap: 16px; }
-  .stat-item { font-size: 12px; color: #888; }
-  .stat-item strong { color: #333; font-weight: 600; }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .mode-switch { display: flex; align-items: center; gap: 8px; }
-  .mode-label { font-size: 13px; color: #999; }
-  .mode-label.active { color: #07c160; font-weight: 600; }
-  .toggle { position: relative; display: inline-block; width: 44px; height: 22px; }
+  .topbar-center { display: flex; gap: 16px; }
+  .stat { font-size: 12px; color: #999; }
+  .stat strong { color: #333; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .icon-btn { background: none; border: 1px solid #e8e8e8; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #555; display: flex; align-items: center; gap: 4px; }
+  .icon-btn:hover { border-color: #07c160; color: #07c160; background: #f6ffed; }
+  .toggle-wrap { display: flex; align-items: center; gap: 6px; margin-left: 6px; }
+  .toggle-label { font-size: 12px; color: #999; }
+  .toggle-label.on { color: #07c160; font-weight: 600; }
+  .toggle { position: relative; width: 40px; height: 20px; display: inline-block; }
   .toggle input { opacity: 0; width: 0; height: 0; }
-  .slider { position: absolute; cursor: pointer; inset: 0; background: #ccc; transition: .3s; border-radius: 22px; }
-  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; transition: .3s; border-radius: 50%; }
+  .slider { position: absolute; inset: 0; background: #ccc; border-radius: 20px; cursor: pointer; transition: .25s; }
+  .slider:before { content: ""; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .25s; }
   input:checked + .slider { background: #07c160; }
-  input:checked + .slider:before { transform: translateX(22px); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
-  .status-dot.connected { background: #52c41a; box-shadow: 0 0 0 3px rgba(82,196,26,0.2); }
-  .status-text { font-size: 12px; color: #999; }
+  input:checked + .slider:before { transform: translateX(20px); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+  .dot.on { background: #52c41a; box-shadow: 0 0 0 3px rgba(82,196,26,.2); }
 
-  /* 主体 */
-  .main { max-width: 1100px; margin: 0 auto; padding: 20px; display: flex; gap: 16px; align-items: flex-start; }
-  .left-panel { width: 360px; flex-shrink: 0; }
-  .right-panel { flex: 1; min-width: 0; }
+  /* ── 主体 ── */
+  .main { max-width: 1080px; margin: 0 auto; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .left { width: 340px; flex-shrink: 0; }
+  .right { flex: 1; min-width: 0; }
 
-  /* 卡片 */
-  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  /* ── 卡片 ── */
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .card-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .card-title { font-size: 14px; font-weight: 600; color: #111; }
-  .card-badge { font-size: 11px; color: #07c160; background: #e8f9ee; padding: 2px 8px; border-radius: 10px; }
+  .badge { font-size: 11px; padding: 1px 8px; border-radius: 10px; }
+  .badge-green { background: #e8f9ee; color: #07c160; }
+  .badge-gray { background: #f5f5f5; color: #999; }
 
-  /* 场合选择 */
-  .occasion-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-  .occasion-btn { border: 1.5px solid #e8e8e8; background: #fafafa; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all 0.15s; color: #555; }
-  .occasion-btn:hover { border-color: #07c160; color: #07c160; }
-  .occasion-btn.active { border-color: #07c160; background: #e8f9ee; color: #07c160; font-weight: 600; }
+  /* ── 场合 / 目标按钮 ── */
+  .chip-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip { border: 1.5px solid #e8e8e8; background: #fafafa; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #666; transition: all .15s; }
+  .chip:hover, .chip.on { border-color: #07c160; background: #e8f9ee; color: #07c160; font-weight: 600; }
+  .pill { border: 1.5px solid #e8e8e8; background: #fff; border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: #666; transition: all .15s; }
+  .pill:hover, .pill.on { border-color: #07c160; background: #e8f9ee; color: #07c160; font-weight: 600; }
 
-  /* 目标选择 */
-  .goal-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-  .goal-btn { border: 1.5px solid #e8e8e8; background: #fff; border-radius: 20px; padding: 5px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; color: #555; }
-  .goal-btn:hover { border-color: #07c160; }
-  .goal-btn.active { border-color: #07c160; background: #e8f9ee; color: #07c160; font-weight: 600; }
-
-  /* 输入区 */
-  .label { font-size: 12px; color: #888; margin-bottom: 5px; }
-  textarea { width: 100%; border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 10px 12px; font-size: 14px; resize: vertical; min-height: 90px; outline: none; font-family: inherit; line-height: 1.5; color: #333; background: #fafafa; }
+  /* ── 输入 ── */
+  .lbl { font-size: 12px; color: #888; margin-bottom: 5px; }
+  textarea { width: 100%; border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 10px 12px; font-size: 14px; resize: vertical; min-height: 88px; outline: none; font-family: inherit; line-height: 1.6; background: #fafafa; }
   textarea:focus { border-color: #07c160; background: #fff; }
-  .char-count { text-align: right; font-size: 11px; color: #ccc; margin-top: 3px; }
+  .char-hint { text-align: right; font-size: 11px; color: #ddd; margin-top: 2px; }
 
-  /* 按钮 */
-  .btn-primary { background: #07c160; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: 500; transition: background 0.15s; }
-  .btn-primary:hover { background: #06ad56; }
-  .btn-primary:disabled { background: #a8d5b5; cursor: not-allowed; }
+  /* ── 主按钮 ── */
+  .btn { background: #07c160; color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 14px; cursor: pointer; width: 100%; font-weight: 500; margin-top: 8px; transition: background .15s; }
+  .btn:hover { background: #06ad56; }
+  .btn:disabled { background: #b2dfcb; cursor: not-allowed; }
 
-  /* 消息列表 */
-  .messages-container { max-height: 560px; overflow-y: auto; }
-  .messages-container::-webkit-scrollbar { width: 4px; }
-  .messages-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 2px; }
-  .msg-item { display: flex; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; }
-  .msg-item:hover { background: #f5f5f5; }
-  .msg-item.selected { background: #e8f9ee; }
-  .msg-item.selected .msg-name { color: #07c160; }
-  .msg-avatar { width: 38px; height: 38px; border-radius: 8px; background: #d9d9d9; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #fff; }
+  /* ── 消息列表 ── */
+  .msg-list { max-height: 540px; overflow-y: auto; }
+  .msg-list::-webkit-scrollbar { width: 4px; }
+  .msg-list::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 2px; }
+  .msg-row { display: flex; gap: 10px; padding: 9px 8px; border-radius: 10px; cursor: pointer; transition: background .12s; }
+  .msg-row:hover { background: #f5f5f5; }
+  .msg-row.sel { background: #e8f9ee; }
+  .av { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
   .msg-body { flex: 1; min-width: 0; }
-  .msg-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .msg-top { display: flex; justify-content: space-between; margin-bottom: 2px; }
   .msg-name { font-size: 13px; font-weight: 600; color: #222; }
-  .msg-time { font-size: 11px; color: #bbb; flex-shrink: 0; }
-  .msg-preview { font-size: 13px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .msg-group-tag { font-size: 11px; color: #aaa; background: #f5f5f5; padding: 1px 6px; border-radius: 4px; margin-bottom: 2px; display: inline-block; }
-  .msg-unread { width: 8px; height: 8px; background: #07c160; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
-  .empty-state { text-align: center; padding: 48px 20px; color: #bbb; font-size: 13px; line-height: 2; }
-  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .msg-row.sel .msg-name { color: #07c160; }
+  .msg-time { font-size: 11px; color: #bbb; }
+  .grp-tag { font-size: 11px; color: #aaa; background: #f5f5f5; padding: 1px 5px; border-radius: 4px; margin-bottom: 2px; display: inline-block; }
+  .msg-preview { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .empty { text-align: center; padding: 44px 16px; color: #ccc; font-size: 13px; line-height: 2; }
+  .new-badge { font-size: 11px; background: #07c160; color: #fff; padding: 1px 7px; border-radius: 10px; cursor: pointer; }
 
-  /* 右侧区域 */
-  .placeholder { text-align: center; padding: 80px 20px; color: #bbb; font-size: 13px; }
-  .placeholder-icon { font-size: 40px; margin-bottom: 12px; }
+  /* ── 右侧占位 ── */
+  .ph { text-align: center; padding: 72px 20px; color: #ccc; font-size: 13px; line-height: 2; }
+  .ph-icon { font-size: 36px; margin-bottom: 10px; }
 
-  /* 选中消息预览卡 */
-  .selected-card { }
-  .msg-bubble { background: #f0f0f0; border-radius: 12px; border-top-left-radius: 2px; padding: 10px 14px; font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 14px; word-break: break-all; }
-  .msg-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
-  .msg-meta-name { font-size: 13px; font-weight: 600; color: #333; }
-  .msg-meta-time { font-size: 12px; color: #aaa; }
-  .msg-meta-type { font-size: 11px; color: #666; background: #f0f0f0; padding: 1px 7px; border-radius: 4px; }
+  /* ── 选中消息预览 ── */
+  .bubble { background: #f0f0f0; border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-size: 14px; line-height: 1.6; color: #333; word-break: break-all; margin-bottom: 14px; }
+  .sender-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .sender-av { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .sender-name { font-size: 13px; font-weight: 600; }
+  .sender-meta { font-size: 11px; color: #aaa; }
+  .type-tag { font-size: 11px; color: #888; background: #f0f0f0; padding: 1px 7px; border-radius: 4px; margin-left: 4px; }
 
-  /* 分析结果 */
-  .scene-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-  .scene-tag { font-size: 12px; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
-  .scene-tag.intent { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
-  .scene-tag.emotion { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
-  .scene-tag.emotion.negative { background: #fff1f0; color: #cf1322; border-color: #ffa39e; }
-  .scene-tag.emotion.urgent { background: #fff2e8; color: #d4380d; border-color: #ffbb96; }
-  .analysis-text { font-size: 13px; color: #555; line-height: 1.7; padding: 10px 12px; background: #fafafa; border-radius: 8px; border-left: 3px solid #07c160; }
-  .tip-box { font-size: 12px; padding: 7px 10px; border-radius: 6px; margin-top: 8px; display: flex; gap: 6px; align-items: flex-start; }
-  .tip-box.warn { background: #fff7e6; color: #d46b08; border: 1px solid #ffe7ba; }
-  .tip-box.info { background: #e6f4ff; color: #0958d9; border: 1px solid #bae0ff; }
+  /* ── 骨架屏 ── */
+  .sk { background: linear-gradient(90deg, #f0f0f0 25%, #e5e5e5 50%, #f0f0f0 75%); background-size: 200% 100%; animation: sk 1.4s infinite; border-radius: 6px; }
+  @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .sk-line { height: 12px; margin-bottom: 8px; }
 
-  /* 回复建议 */
-  .reply-item { border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 13px 14px; margin-bottom: 8px; position: relative; transition: border-color 0.15s; }
-  .reply-item:hover { border-color: #b7eb8f; }
-  .reply-item.recommended { border-color: #07c160; background: #f6ffed; }
-  .reply-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  /* ── 分析结果 ── */
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .tag { font-size: 12px; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
+  .tag-intent { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+  .tag-ok { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+  .tag-neg { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+  .tag-urg { background: #fff2e8; color: #d4380d; border: 1px solid #ffbb96; }
+  .analysis-box { font-size: 13px; color: #555; line-height: 1.7; padding: 10px 12px; background: #fafafa; border-left: 3px solid #07c160; border-radius: 0 6px 6px 0; }
+  .tip { font-size: 12px; padding: 7px 10px; border-radius: 6px; margin-top: 8px; display: flex; gap: 6px; }
+  .tip-warn { background: #fff7e6; color: #d46b08; border: 1px solid #ffe7ba; }
+  .tip-info { background: #e6f4ff; color: #0958d9; border: 1px solid #bae0ff; }
+
+  /* ── 回复建议 ── */
+  .reply-card { border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 13px 14px; margin-bottom: 8px; transition: border-color .15s; }
+  .reply-card:hover { border-color: #b7eb8f; }
+  .reply-card.rec { border-color: #07c160; background: #f6ffed; }
+  .reply-hd { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 7px; }
   .reply-tags { display: flex; gap: 4px; flex-wrap: wrap; }
-  .reply-tag { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: #f0f0f0; color: #666; }
-  .reply-tag.rec { background: #e8f9ee; color: #07c160; font-weight: 600; }
-  .copy-btn { background: #f5f5f5; border: none; border-radius: 6px; padding: 3px 10px; font-size: 12px; cursor: pointer; color: #666; flex-shrink: 0; }
+  .rtag { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: #f0f0f0; color: #666; }
+  .rtag-rec { background: #e8f9ee; color: #07c160; font-weight: 600; }
+  .copy-btn { background: #f5f5f5; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #666; flex-shrink: 0; }
   .copy-btn:hover { background: #e8f9ee; color: #07c160; }
-  .copy-btn.copied { background: #d4edda; color: #28a745; }
+  .copy-btn.done { background: #d4edda; color: #28a745; }
   .reply-text { font-size: 14px; font-weight: 500; color: #222; line-height: 1.5; margin-bottom: 5px; }
-  .reply-reason { font-size: 12px; color: #999; }
+  .reply-dir { font-size: 12px; color: #aaa; }
 
-  /* 避免说 */
-  .avoid-item { display: flex; gap: 8px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
-  .avoid-item:last-child { border-bottom: none; }
-  .avoid-label { color: #ff4d4f; font-weight: 500; flex-shrink: 0; }
-  .avoid-reason { color: #999; }
+  /* ── 避免说 ── */
+  .avoid-row { display: flex; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+  .avoid-row:last-child { border-bottom: none; }
 
-  /* 骨架屏 */
-  .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  .sk-line { height: 13px; margin-bottom: 8px; }
-  .sk-line.short { width: 40%; }
-  .sk-line.mid { width: 70%; }
-  .sk-line.full { width: 100%; }
-  .sk-block { height: 60px; margin-bottom: 10px; }
+  /* ── 模态框通用 ── */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; }
+  .overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 16px; width: 560px; max-width: 95vw; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,.18); }
+  .modal-hd { padding: 18px 20px 14px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; line-height: 1; }
+  .modal-close:hover { color: #333; }
+  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+  .modal-foot { padding: 12px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-ghost { background: #fff; border: 1px solid #d9d9d9; border-radius: 6px; padding: 7px 16px; font-size: 13px; cursor: pointer; }
+  .btn-ghost:hover { border-color: #07c160; color: #07c160; }
+  .btn-solid { background: #07c160; color: #fff; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px; cursor: pointer; }
+  .btn-solid:hover { background: #06ad56; }
+  .btn-danger { background: #fff; color: #ff4d4f; border: 1px solid #ffccc7; border-radius: 6px; padding: 7px 16px; font-size: 13px; cursor: pointer; }
+  .btn-danger:hover { background: #fff1f0; }
 
-  /* 分隔线 */
+  /* ── 画像模态框 ── */
+  .profile-section { margin-bottom: 20px; }
+  .profile-section-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0; }
+  .style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .style-item { background: #fafafa; border-radius: 8px; padding: 10px 12px; }
+  .style-item .lbl { font-size: 11px; color: #aaa; margin-bottom: 3px; }
+  .style-item .val { font-size: 14px; font-weight: 600; color: #333; }
+  .weakness-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #f0f0f0; border-radius: 8px; margin-bottom: 6px; }
+  .weakness-info { flex: 1; }
+  .weakness-name { font-size: 13px; font-weight: 600; }
+  .weakness-desc { font-size: 12px; color: #999; margin-top: 2px; }
+  .w-count { font-size: 11px; color: #ff7a45; background: #fff2e8; padding: 1px 7px; border-radius: 10px; }
+  .w-confirmed { font-size: 11px; color: #07c160; background: #e8f9ee; padding: 1px 7px; border-radius: 10px; }
+  .analyze-result { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: #389e0d; }
+
+  /* ── 联系人模态框 ── */
+  .contact-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #f0f0f0; border-radius: 8px; margin-bottom: 6px; cursor: pointer; transition: border-color .15s; }
+  .contact-item:hover { border-color: #07c160; }
+  .contact-av { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .contact-info { flex: 1; }
+  .contact-name { font-size: 13px; font-weight: 600; }
+  .contact-meta { font-size: 12px; color: #aaa; margin-top: 2px; }
+  .form-row { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: #888; margin-bottom: 5px; }
+  input[type="text"] { width: 100%; border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; }
+  input[type="text"]:focus { border-color: #07c160; }
+  select { width: 100%; border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 8px 12px; font-size: 13px; outline: none; background: #fff; }
+  select:focus { border-color: #07c160; }
+
+  /* ── Skill 模态框 ── */
+  .skill-card { border: 1px solid #f0f0f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+  .skill-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .skill-desc { font-size: 12px; color: #888; margin-bottom: 8px; line-height: 1.5; }
+  .skill-scenes { display: flex; gap: 4px; flex-wrap: wrap; }
+  .skill-scene { font-size: 11px; background: #f5f5f5; color: #666; padding: 1px 7px; border-radius: 10px; }
+
+  /* ── 分隔线 ── */
   .divider { height: 1px; background: #f0f0f0; margin: 12px 0; }
 </style>
 </head>
 <body>
 
-<!-- 顶栏 -->
+<!-- ── 顶栏 ── -->
 <div class="topbar">
-  <div class="topbar-left">
-    <div class="logo">微信<span>沟通</span>助手</div>
-    <div class="stats">
-      <div class="stat-item">今日收到 <strong id="statReceived">0</strong> 条</div>
-      <div class="stat-item">已分析 <strong id="statAnalyzed">0</strong> 条</div>
-    </div>
+  <div class="logo">微信<span>沟通</span>助手</div>
+  <div class="topbar-center">
+    <span class="stat">今日收到 <strong id="statR">0</strong></span>
+    <span class="stat">已分析 <strong id="statA">0</strong></span>
   </div>
   <div class="topbar-right">
-    <div class="status-dot" id="statusDot"></div>
-    <span class="status-text" id="statusText">未连接</span>
-    <div class="mode-switch">
-      <span class="mode-label" id="manualLabel">手动</span>
-      <label class="toggle">
-        <input type="checkbox" id="modeToggle" checked>
-        <span class="slider"></span>
-      </label>
-      <span class="mode-label active" id="autoLabel">自动</span>
+    <button class="icon-btn" onclick="openModal('profileModal')">👤 我的画像</button>
+    <button class="icon-btn" onclick="openModal('contactModal')">📋 联系人</button>
+    <button class="icon-btn" onclick="openSkills()">🧠 Skills</button>
+    <div class="toggle-wrap">
+      <span class="toggle-label" id="mLbl">手动</span>
+      <label class="toggle"><input type="checkbox" id="modeToggle" checked><span class="slider"></span></label>
+      <span class="toggle-label on" id="aLbl">自动</span>
     </div>
+    <div class="dot" id="dot"></div>
   </div>
 </div>
 
+<!-- ── 主体 ── -->
 <div class="main">
 
   <!-- 左侧 -->
-  <div class="left-panel">
+  <div class="left">
 
     <!-- 自动模式：消息列表 -->
     <div id="autoPanel">
       <div class="card">
-        <div class="card-header">
+        <div class="card-hd">
           <span class="card-title">实时消息</span>
-          <span class="card-badge" id="unreadBadge" style="display:none">有新消息</span>
+          <span class="new-badge" id="newBadge" style="display:none" onclick="scrollTop()">有新消息 ↑</span>
         </div>
-        <div class="messages-container" id="messagesContainer">
-          <div class="empty-state">
-            <div class="empty-icon">💬</div>
-            等待 WeFlow 推送新消息...<br>
-            <span style="font-size:11px">确保 WeFlow HTTP API 服务已开启</span>
-          </div>
+        <div class="msg-list" id="msgList">
+          <div class="empty">💬<br>等待 WeFlow 推送消息<br><span style="font-size:11px">确保 WeFlow HTTP API 已开启</span></div>
         </div>
       </div>
     </div>
 
-    <!-- 手动模式：输入区 -->
+    <!-- 手动模式 -->
     <div id="manualPanel" style="display:none">
       <div class="card">
         <div class="card-title" style="margin-bottom:12px">粘贴消息</div>
-
-        <div class="label">场合</div>
-        <div class="occasion-row" id="manualOccasionRow">
-          <button class="occasion-btn active" data-occasion="friend">朋友</button>
-          <button class="occasion-btn" data-occasion="work">工作群</button>
-          <button class="occasion-btn" data-occasion="family">家人</button>
-          <button class="occasion-btn" data-occasion="colleague">同事</button>
-          <button class="occasion-btn" data-occasion="stranger">陌生人</button>
+        <div class="lbl">场合</div>
+        <div class="chip-row" id="mOccRow">
+          <button class="chip on" data-v="friend">朋友</button>
+          <button class="chip" data-v="work">工作群</button>
+          <button class="chip" data-v="family">家人</button>
+          <button class="chip" data-v="colleague">同事</button>
+          <button class="chip" data-v="stranger">陌生人</button>
         </div>
-
-        <div class="label">对方发来的消息</div>
-        <textarea id="manualMessage" placeholder="粘贴对方的消息内容..." oninput="updateCharCount(this)"></textarea>
-        <div class="char-count"><span id="charCount">0</span> 字</div>
-
-        <div class="label" style="margin-top:12px">我现在想...</div>
-        <div class="goal-row" id="manualGoalRow">
-          <button class="goal-btn" data-goal="agree">答应</button>
-          <button class="goal-btn" data-goal="decline">婉拒</button>
-          <button class="goal-btn" data-goal="advance">推进</button>
-          <button class="goal-btn" data-goal="maintain">维持关系</button>
-          <button class="goal-btn active" data-goal="casual">随便回</button>
+        <div class="lbl">对方发来的消息</div>
+        <textarea id="mTxt" placeholder="粘贴对方的消息..." oninput="document.getElementById('mCC').textContent=this.value.length"></textarea>
+        <div class="char-hint"><span id="mCC">0</span> 字</div>
+        <div class="lbl" style="margin-top:12px">我想...</div>
+        <div class="chip-row" id="mGoalRow">
+          <button class="pill" data-v="agree">答应</button>
+          <button class="pill" data-v="decline">婉拒</button>
+          <button class="pill" data-v="advance">推进</button>
+          <button class="pill" data-v="maintain">维持关系</button>
+          <button class="pill on" data-v="casual">随便回</button>
         </div>
-
-        <button class="btn-primary" id="submitBtn" onclick="submitManual()">生成回复建议</button>
+        <button class="btn" id="mBtn" onclick="submitManual()">生成回复建议</button>
       </div>
     </div>
 
   </div>
 
   <!-- 右侧 -->
-  <div class="right-panel">
+  <div class="right">
 
-    <!-- 默认占位 -->
-    <div id="placeholder" class="card">
-      <div class="placeholder">
-        <div class="placeholder-icon">✨</div>
-        选择左侧一条消息，或切换到手动模式粘贴消息<br>
-        <span style="font-size:11px; color:#ddd">AI 会分析场景并给出最适合你的回复</span>
-      </div>
+    <!-- 占位 -->
+    <div id="phCard" class="card">
+      <div class="ph"><div class="ph-icon">✨</div>选择一条消息，或切换手动模式粘贴内容<br><span style="font-size:11px;color:#e0e0e0">AI 分析场景并给出最适合你风格的回复</span></div>
     </div>
 
     <!-- 选中消息预览（自动模式） -->
-    <div id="selectedCard" class="card selected-card" style="display:none">
-      <div class="card-header">
+    <div id="selCard" class="card" style="display:none">
+      <div class="sender-row">
+        <div class="sender-av" id="selAv"></div>
         <div>
-          <div class="msg-meta">
-            <div class="msg-avatar" id="selAvatar"></div>
-            <div>
-              <div class="msg-meta-name" id="selName"></div>
-              <div style="display:flex;gap:6px;margin-top:2px">
-                <span class="msg-meta-time" id="selTime"></span>
-                <span class="msg-meta-type" id="selType"></span>
-              </div>
-            </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="sender-name" id="selName"></span>
+            <span class="type-tag" id="selType"></span>
           </div>
+          <div class="sender-meta" id="selTime"></div>
         </div>
       </div>
-      <div class="msg-bubble" id="selContent"></div>
-
-      <div class="label">场合</div>
-      <div class="occasion-row" id="autoOccasionRow">
-        <button class="occasion-btn active" data-occasion="friend">朋友</button>
-        <button class="occasion-btn" data-occasion="work">工作群</button>
-        <button class="occasion-btn" data-occasion="family">家人</button>
-        <button class="occasion-btn" data-occasion="colleague">同事</button>
-        <button class="occasion-btn" data-occasion="stranger">陌生人</button>
+      <div class="bubble" id="selBubble"></div>
+      <div class="lbl">场合</div>
+      <div class="chip-row" id="aOccRow">
+        <button class="chip on" data-v="friend">朋友</button>
+        <button class="chip" data-v="work">工作群</button>
+        <button class="chip" data-v="family">家人</button>
+        <button class="chip" data-v="colleague">同事</button>
+        <button class="chip" data-v="stranger">陌生人</button>
       </div>
-
-      <div class="label">我现在想...</div>
-      <div class="goal-row" id="autoGoalRow">
-        <button class="goal-btn" data-goal="agree">答应</button>
-        <button class="goal-btn" data-goal="decline">婉拒</button>
-        <button class="goal-btn" data-goal="advance">推进</button>
-        <button class="goal-btn" data-goal="maintain">维持关系</button>
-        <button class="goal-btn active" data-goal="casual">随便回</button>
+      <div class="lbl">我想...</div>
+      <div class="chip-row" id="aGoalRow">
+        <button class="pill" data-v="agree">答应</button>
+        <button class="pill" data-v="decline">婉拒</button>
+        <button class="pill" data-v="advance">推进</button>
+        <button class="pill" data-v="maintain">维持关系</button>
+        <button class="pill on" data-v="casual">随便回</button>
       </div>
-
-      <button class="btn-primary" id="analyzeBtn" onclick="analyzeSelected()">生成回复建议</button>
+      <button class="btn" id="aBtn" onclick="analyzeSelected()">生成回复建议</button>
     </div>
 
-    <!-- 骨架屏（加载中） -->
-    <div id="loadingCard" style="display:none">
-      <div class="card">
-        <div class="sk-line short skeleton"></div>
-        <div class="sk-line mid skeleton"></div>
-        <div class="sk-line full skeleton"></div>
-      </div>
-      <div class="card">
-        <div class="sk-line short skeleton" style="margin-bottom:12px"></div>
-        <div class="sk-block skeleton"></div>
-        <div class="sk-block skeleton"></div>
-      </div>
+    <!-- 骨架屏 -->
+    <div id="skelCard" style="display:none">
+      <div class="card"><div class="sk sk-line" style="width:30%"></div><div class="sk sk-line" style="width:65%"></div><div class="sk sk-line" style="width:100%"></div></div>
+      <div class="card"><div class="sk sk-line" style="width:25%;margin-bottom:14px"></div><div class="sk sk-line" style="width:100%;height:56px"></div><div class="sk sk-line" style="width:100%;height:56px;margin-top:8px"></div></div>
     </div>
 
     <!-- 分析结果 -->
-    <div id="result" style="display:none">
-
-      <!-- 局势分析 -->
+    <div id="resultWrap" style="display:none">
       <div class="card">
         <div class="card-title" style="margin-bottom:10px">局势分析</div>
-        <div class="scene-tags" id="sceneTags"></div>
-        <div class="analysis-text" id="analysisText"></div>
-        <div id="weaknessTip"></div>
-        <div id="frameworkTip"></div>
+        <div class="tag-row" id="tagRow"></div>
+        <div class="analysis-box" id="analysisBox"></div>
+        <div id="warnTip"></div>
+        <div id="infoTip"></div>
       </div>
-
-      <!-- 回复建议 -->
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">回复建议</span>
-          <span class="card-badge" id="repliesCount"></span>
-        </div>
-        <div id="repliesContainer"></div>
+        <div class="card-hd"><span class="card-title">回复建议</span><span class="badge badge-green" id="replyCnt"></span></div>
+        <div id="replyList"></div>
       </div>
-
-      <!-- 建议避免 -->
       <div class="card" id="avoidCard" style="display:none">
         <div class="card-title" style="margin-bottom:10px">建议避免说</div>
-        <div id="avoidContainer"></div>
+        <div id="avoidList"></div>
       </div>
-
     </div>
 
   </div>
 </div>
 
+<!-- ══════════════════════════════════════
+     模态框：用户画像
+══════════════════════════════════════ -->
+<div class="overlay" id="profileModal">
+  <div class="modal" style="width:580px">
+    <div class="modal-hd">
+      <span class="modal-title">👤 我的沟通画像</span>
+      <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+    </div>
+    <div class="modal-body" id="profileBody">
+      <div class="empty" style="padding:30px">加载中...</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal('profileModal')">关闭</button>
+      <button class="btn-solid" id="analyzeBtn" onclick="runAnalyze()">分析历史消息</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     模态框：联系人
+══════════════════════════════════════ -->
+<div class="overlay" id="contactModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <span class="modal-title">📋 联系人管理</span>
+      <button class="modal-close" onclick="closeModal('contactModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- 列表视图 -->
+      <div id="contactList"></div>
+      <button class="btn-ghost" style="width:100%;margin-top:6px" onclick="showContactForm(null)">＋ 添加联系人</button>
+      <!-- 表单视图 -->
+      <div id="contactForm" style="display:none">
+        <div class="form-row">
+          <div class="form-label">微信 ID / 群 ID</div>
+          <input type="text" id="cfId" placeholder="输入 ID">
+        </div>
+        <div class="form-row">
+          <div class="form-label">备注名</div>
+          <input type="text" id="cfName" placeholder="输入备注名">
+        </div>
+        <div class="form-row">
+          <div class="form-label">场合</div>
+          <select id="cfOcc">
+            <option value="friend">朋友</option>
+            <option value="work">工作群</option>
+            <option value="family">家人</option>
+            <option value="colleague">同事</option>
+            <option value="boss">上司</option>
+            <option value="stranger">陌生人</option>
+            <option value="business">商务</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-label">关系类型</div>
+          <select id="cfRel">
+            <option value="friend">朋友</option>
+            <option value="peer">平级同事</option>
+            <option value="superior">上级</option>
+            <option value="subordinate">下级</option>
+            <option value="family">家人</option>
+            <option value="business">商务</option>
+            <option value="stranger">陌生人</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-label">关系状态</div>
+          <select id="cfStatus">
+            <option value="normal">正常</option>
+            <option value="friction">最近有摩擦</option>
+            <option value="new">刚认识</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" id="contactFoot">
+      <button class="btn-ghost" onclick="closeModal('contactModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     模态框：Skills
+══════════════════════════════════════ -->
+<div class="overlay" id="skillModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <span class="modal-title">🧠 沟通技能库</span>
+      <button class="modal-close" onclick="closeModal('skillModal')">✕</button>
+    </div>
+    <div class="modal-body" id="skillBody">
+      <div class="empty">加载中...</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal('skillModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  let ws = null
-  let messages = []
-  let selectedMessage = null
-  let isAutoMode = true
-  let selectedGoal = 'casual'
-  let selectedOccasion = 'friend'
-  let statReceived = 0
-  let statAnalyzed = 0
+// ──────────────────────────────────────
+// 状态
+// ──────────────────────────────────────
+let ws = null
+let msgs = []          // 实时消息列表
+let selMsg = null      // 当前选中的消息
+let isAuto = true
+let goal = 'casual'
+let occasion = 'friend'
+let statR = 0, statA = 0
+let currentReplies = []   // 当前显示的回复列表（用于复制）
+let currentScene = 'casual'  // 当前分析的场景（用于样本保存）
 
-  const INTENT_LABELS = {
-    criticism: '批评', conflict: '冲突', request: '请求', negotiation: '协商',
-    emotional: '情绪化', invitation: '邀约', persuasion: '说服', workplace: '职场',
-    casual: '日常', disagreement: '分歧', demand: '催促'
-  }
-  const EMOTION_STYLES = {
-    neutral: { label: '情绪平稳', cls: '' },
-    positive: { label: '态度积极', cls: '' },
-    negative: { label: '情绪消极', cls: 'negative' },
-    urgent: { label: '情绪紧张', cls: 'urgent' },
-  }
+const INTENT = { criticism:'批评',conflict:'冲突',request:'请求',negotiation:'协商',emotional:'情绪化',invitation:'邀约',persuasion:'说服',workplace:'职场',casual:'日常',disagreement:'分歧',demand:'催促' }
+const COLORS = ['#07c160','#1677ff','#fa8c16','#722ed1','#eb2f96','#13c2c2','#f5222d']
+const OMAP = { friend:'朋友',work:'工作群',family:'家人',colleague:'同事',boss:'上司',stranger:'陌生人',business:'商务' }
 
-  // 模式切换
-  document.getElementById('modeToggle').addEventListener('change', (e) => {
-    isAutoMode = e.target.checked
-    document.getElementById('autoLabel').classList.toggle('active', isAutoMode)
-    document.getElementById('manualLabel').classList.toggle('active', !isAutoMode)
-    document.getElementById('autoPanel').style.display = isAutoMode ? 'block' : 'none'
-    document.getElementById('manualPanel').style.display = isAutoMode ? 'none' : 'block'
-    resetRight()
-    if (!isAutoMode) {
-      if (ws) ws.close()
-    } else {
-      connectWebSocket()
-    }
-  })
+// ──────────────────────────────────────
+// 工具
+// ──────────────────────────────────────
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function color(id){ let h=0;for(let c of(id||''))h=(h*31+c.charCodeAt(0))&0xffff;return COLORS[h%COLORS.length] }
+function initial(name){ return (name||'?')[0].toUpperCase() }
 
-  // 场合 & 目标按钮通用绑定
-  function bindBtns(rowId, onChange) {
-    document.querySelectorAll(`#${rowId} button`).forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll(`#${rowId} button`).forEach(b => b.classList.remove('active'))
-        btn.classList.add('active')
-        onChange(btn.dataset.occasion || btn.dataset.goal)
-      })
+// ──────────────────────────────────────
+// 模式切换
+// ──────────────────────────────────────
+document.getElementById('modeToggle').addEventListener('change', e => {
+  isAuto = e.target.checked
+  document.getElementById('aLbl').className = 'toggle-label' + (isAuto ? ' on' : '')
+  document.getElementById('mLbl').className = 'toggle-label' + (!isAuto ? ' on' : '')
+  document.getElementById('autoPanel').style.display = isAuto ? 'block' : 'none'
+  document.getElementById('manualPanel').style.display = isAuto ? 'none' : 'block'
+  resetRight()
+  if (!isAuto) { if(ws) ws.close() }
+  else connectWS()
+})
+
+// ──────────────────────────────────────
+// 按钮组绑定
+// ──────────────────────────────────────
+function bindGroup(id, cb) {
+  document.querySelectorAll(`#${id} button`).forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll(`#${id} button`).forEach(x => x.classList.remove('on'))
+      b.classList.add('on')
+      cb(b.dataset.v)
     })
+  })
+}
+bindGroup('mOccRow', v => occasion = v)
+bindGroup('mGoalRow', v => goal = v)
+bindGroup('aOccRow', v => occasion = v)
+bindGroup('aGoalRow', v => goal = v)
+
+// ──────────────────────────────────────
+// WebSocket
+// ──────────────────────────────────────
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
+  ws = new WebSocket(`${proto}//${location.host}`)
+  ws.onopen  = () => setDot(true)
+  ws.onclose = () => { setDot(false); if(isAuto) setTimeout(connectWS, 3000) }
+  ws.onerror = () => setDot(false)
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data)
+    if (msg.type === 'new_message') onNewMsg(msg.data)
   }
-  bindBtns('manualOccasionRow', v => selectedOccasion = v)
-  bindBtns('manualGoalRow', v => selectedGoal = v)
-  bindBtns('autoOccasionRow', v => selectedOccasion = v)
-  bindBtns('autoGoalRow', v => selectedGoal = v)
+}
+function setDot(on) {
+  document.getElementById('dot').className = 'dot' + (on ? ' on' : '')
+}
 
-  // WebSocket
-  function connectWebSocket() {
-    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
-    ws = new WebSocket(`${protocol}//${location.host}`)
-    ws.onopen = () => setStatus(true)
-    ws.onclose = () => { setStatus(false); if (isAutoMode) setTimeout(connectWebSocket, 3000) }
-    ws.onerror = () => setStatus(false)
-    ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data)
-      if (msg.type === 'new_message') receiveMessage(msg.data)
-    }
+// ──────────────────────────────────────
+// 消息列表
+// ──────────────────────────────────────
+function onNewMsg(msg) {
+  if (msgs.find(m => m.id === msg.id)) return
+  msgs.unshift(msg)
+  statR++
+  document.getElementById('statR').textContent = statR
+  renderMsgs()
+  const list = document.getElementById('msgList')
+  if (list.scrollTop > 60) document.getElementById('newBadge').style.display = 'inline-block'
+}
+
+function scrollTop() {
+  document.getElementById('msgList').scrollTop = 0
+  document.getElementById('newBadge').style.display = 'none'
+}
+
+function renderMsgs() {
+  document.getElementById('newBadge').style.display = 'none'
+  const el = document.getElementById('msgList')
+  if (!msgs.length) {
+    el.innerHTML = '<div class="empty">💬<br>等待 WeFlow 推送消息<br><span style="font-size:11px">确保 WeFlow HTTP API 已开启</span></div>'
+    return
   }
+  el.innerHTML = msgs.map(m => {
+    const t = new Date(m.timestamp).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})
+    const isG = m.contactName?.includes(' - ')
+    const [grp, sender] = isG ? m.contactName.split(' - ') : [m.contactName, '']
+    const sel = selMsg?.id === m.id
+    return `<div class="msg-row${sel?' sel':''}" onclick="selectMsg('${esc(m.id)}')">
+      <div class="av" style="background:${color(m.contactId)}">${initial(m.contactName)}</div>
+      <div class="msg-body">
+        <div class="msg-top"><span class="msg-name">${esc(isG?grp:m.contactName)}</span><span class="msg-time">${t}</span></div>
+        ${isG?`<span class="grp-tag">${esc(sender)}</span>`:''}
+        <div class="msg-preview">${esc(m.content)}</div>
+      </div>
+    </div>`
+  }).join('')
+}
 
-  function setStatus(connected) {
-    document.getElementById('statusDot').className = 'status-dot' + (connected ? ' connected' : '')
-    document.getElementById('statusText').textContent = connected ? '已连接' : '未连接'
-  }
+// ──────────────────────────────────────
+// 选中消息（只展示，不分析）
+// ──────────────────────────────────────
+function selectMsg(id) {
+  selMsg = msgs.find(m => m.id === id)
+  if (!selMsg) return
+  renderMsgs()
+  resetRight()
 
-  // 接收新消息
-  function receiveMessage(msg) {
-    if (messages.find(m => m.id === msg.id)) return
-    messages.unshift(msg)
-    statReceived++
-    document.getElementById('statReceived').textContent = statReceived
-    renderMessages()
-    // 如果用户不在顶部则显示"有新消息"提示
-    const container = document.getElementById('messagesContainer')
-    if (container.scrollTop > 60) {
-      document.getElementById('unreadBadge').style.display = 'inline-block'
-    }
-  }
+  const m = selMsg
+  const isG = m.contactName?.includes(' - ')
+  const [grp, sender] = isG ? m.contactName.split(' - ') : [m.contactName, '']
+  const av = document.getElementById('selAv')
+  av.textContent = initial(m.contactName)
+  av.style.background = color(m.contactId)
+  document.getElementById('selName').textContent = isG ? grp : m.contactName
+  document.getElementById('selType').textContent = isG ? '群聊' : '私聊'
+  document.getElementById('selTime').textContent = new Date(m.timestamp).toLocaleString('zh-CN')
+  document.getElementById('selBubble').textContent = m.content
+  document.getElementById('selCard').style.display = 'block'
+  document.getElementById('phCard').style.display = 'none'
+}
 
-  // 渲染消息列表
-  function renderMessages() {
-    document.getElementById('unreadBadge').style.display = 'none'
-    const container = document.getElementById('messagesContainer')
-    if (messages.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div>等待 WeFlow 推送新消息...<br><span style="font-size:11px">确保 WeFlow HTTP API 服务已开启</span></div>'
-      return
-    }
-    container.innerHTML = messages.map(msg => {
-      const time = new Date(msg.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-      const isSelected = selectedMessage?.id === msg.id
-      const initial = (msg.contactName || '?')[0].toUpperCase()
-      const color = avatarColor(msg.contactId)
-      const isGroup = msg.contactName?.includes(' - ')
-      const [groupOrName, sender] = isGroup ? msg.contactName.split(' - ') : [msg.contactName, '']
-      return `
-        <div class="msg-item ${isSelected ? 'selected' : ''}" onclick="selectMessage('${escapeAttr(msg.id)}')">
-          <div class="msg-avatar" style="background:${color}">${initial}</div>
-          <div class="msg-body">
-            <div class="msg-top">
-              <span class="msg-name">${escapeHtml(isGroup ? groupOrName : msg.contactName)}</span>
-              <span class="msg-time">${time}</span>
-            </div>
-            ${isGroup ? `<span class="msg-group-tag">${escapeHtml(sender)}</span>` : ''}
-            <div class="msg-preview">${escapeHtml(msg.content)}</div>
-          </div>
-        </div>`
-    }).join('')
-  }
+// ──────────────────────────────────────
+// 分析入口
+// ──────────────────────────────────────
+async function analyzeSelected() {
+  if (!selMsg) return
+  const btn = document.getElementById('aBtn')
+  btn.disabled = true; btn.textContent = '分析中...'
+  document.getElementById('selCard').style.display = 'none'
+  await doGenerate(selMsg.contactId, selMsg.content)
+  btn.disabled = false; btn.textContent = '生成回复建议'
+}
 
-  function avatarColor(id) {
-    const colors = ['#07c160','#1677ff','#fa8c16','#722ed1','#eb2f96','#13c2c2']
-    let h = 0; for (let c of (id||'')) h = (h*31 + c.charCodeAt(0)) & 0xffff
-    return colors[h % colors.length]
-  }
+async function submitManual() {
+  const txt = document.getElementById('mTxt').value.trim()
+  if (!txt) { alert('请粘贴对方的消息'); return }
+  const btn = document.getElementById('mBtn')
+  btn.disabled = true; btn.textContent = '分析中...'
+  resetRight()
+  await doGenerate('manual', txt)
+  btn.disabled = false; btn.textContent = '生成回复建议'
+}
 
-  // 选中消息（只展示，不分析）
-  function selectMessage(msgId) {
-    selectedMessage = messages.find(m => m.id === msgId)
-    if (!selectedMessage) return
-    renderMessages()
-    resetRight()
-
-    const msg = selectedMessage
-    const isGroup = msg.contactName?.includes(' - ')
-    const [groupOrName, sender] = isGroup ? msg.contactName.split(' - ') : [msg.contactName, '']
-    const initial = (msg.contactName || '?')[0].toUpperCase()
-    const color = avatarColor(msg.contactId)
-
-    document.getElementById('selAvatar').textContent = initial
-    document.getElementById('selAvatar').style.background = color
-    document.getElementById('selName').textContent = isGroup ? groupOrName : msg.contactName
-    document.getElementById('selTime').textContent = new Date(msg.timestamp).toLocaleString('zh-CN')
-    document.getElementById('selType').textContent = isGroup ? '群聊' : '私聊'
-    document.getElementById('selContent').textContent = msg.content
-
-    document.getElementById('selectedCard').style.display = 'block'
-  }
-
-  // 分析（自动模式）
-  async function analyzeSelected() {
-    if (!selectedMessage) return
-    const btn = document.getElementById('analyzeBtn')
-    btn.disabled = true
-    btn.textContent = '分析中...'
-    document.getElementById('selectedCard').style.display = 'none'
-    await doGenerate(selectedMessage.contactId, selectedMessage.content)
-    btn.disabled = false
-    btn.textContent = '生成回复建议'
-  }
-
-  // 手动模式提交
-  async function submitManual() {
-    const message = document.getElementById('manualMessage').value.trim()
-    if (!message) { alert('请粘贴对方的消息内容'); return }
-    const btn = document.getElementById('submitBtn')
-    btn.disabled = true
-    btn.textContent = '分析中...'
-    resetRight()
-    await doGenerate('manual', message)
-    btn.disabled = false
-    btn.textContent = '生成回复建议'
-  }
-
-  // 核心：调用 API 生成回复
-  async function doGenerate(contactId, message) {
-    document.getElementById('placeholder').style.display = 'none'
-    document.getElementById('loadingCard').style.display = 'block'
-    document.getElementById('result').style.display = 'none'
-
-    try {
-      const res = await fetch('/api/suggest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contactId, message, goal: selectedGoal, occasion: selectedOccasion })
-      })
-      const data = await res.json()
-      document.getElementById('loadingCard').style.display = 'none'
-      if (data.ok) {
-        statAnalyzed++
-        document.getElementById('statAnalyzed').textContent = statAnalyzed
-        renderResult(data.result)
-      } else {
-        alert('生成失败：' + data.error)
-        resetRight()
-      }
-    } catch (e) {
-      document.getElementById('loadingCard').style.display = 'none'
-      alert('请求失败，请检查服务是否正常运行')
+// ──────────────────────────────────────
+// 核心：调用 API 生成回复
+// ──────────────────────────────────────
+async function doGenerate(contactId, message) {
+  document.getElementById('phCard').style.display = 'none'
+  document.getElementById('skelCard').style.display = 'block'
+  document.getElementById('resultWrap').style.display = 'none'
+  try {
+    const res = await fetch('/api/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contactId, message, goal, occasion })
+    })
+    const data = await res.json()
+    document.getElementById('skelCard').style.display = 'none'
+    if (data.ok) {
+      statA++
+      document.getElementById('statA').textContent = statA
+      renderResult(data.result)
+    } else {
+      alert('生成失败：' + data.error)
       resetRight()
     }
+  } catch(e) {
+    document.getElementById('skelCard').style.display = 'none'
+    alert('请求失败，请检查服务是否正常')
+    resetRight()
+  }
+}
+
+function resetRight() {
+  document.getElementById('phCard').style.display = 'block'
+  document.getElementById('selCard').style.display = 'none'
+  document.getElementById('skelCard').style.display = 'none'
+  document.getElementById('resultWrap').style.display = 'none'
+}
+
+// ──────────────────────────────────────
+// 渲染结果
+// ──────────────────────────────────────
+function renderResult(r) {
+  currentReplies = r.replies || []
+  currentScene = r.intent || 'casual'
+
+  // 场景标签
+  const tagRow = document.getElementById('tagRow')
+  tagRow.innerHTML = ''
+  if (r.intent) tagRow.innerHTML += `<span class="tag tag-intent">${esc(INTENT[r.intent]||r.intent)}</span>`
+  if (r.emotion) {
+    const cls = r.emotion==='negative'?'tag-neg':r.emotion==='urgent'?'tag-urg':'tag-ok'
+    const label = {neutral:'情绪平稳',positive:'态度积极',negative:'情绪消极',urgent:'情绪紧张'}[r.emotion]||r.emotion
+    tagRow.innerHTML += `<span class="tag ${cls}">${label}</span>`
   }
 
-  function resetRight() {
-    document.getElementById('placeholder').style.display = 'block'
-    document.getElementById('selectedCard').style.display = 'none'
-    document.getElementById('loadingCard').style.display = 'none'
-    document.getElementById('result').style.display = 'none'
-  }
+  document.getElementById('analysisBox').textContent = r.situationAnalysis || ''
+  document.getElementById('warnTip').innerHTML = r.weaknessTip ? `<div class="tip tip-warn">⚠️ ${esc(r.weaknessTip)}</div>` : ''
+  document.getElementById('infoTip').innerHTML  = r.frameworkTip ? `<div class="tip tip-info">💡 ${esc(r.frameworkTip)}</div>` : ''
 
-  function renderResult(r) {
-    // 场景标签
-    const tags = document.getElementById('sceneTags')
-    tags.innerHTML = ''
-    if (r.intent) {
-      const span = document.createElement('span')
-      span.className = 'scene-tag intent'
-      span.textContent = INTENT_LABELS[r.intent] || r.intent
-      tags.appendChild(span)
-    }
-    if (r.emotion) {
-      const e = EMOTION_STYLES[r.emotion] || { label: r.emotion, cls: '' }
-      const span = document.createElement('span')
-      span.className = `scene-tag emotion ${e.cls}`
-      span.textContent = e.label
-      tags.appendChild(span)
-    }
-
-    document.getElementById('analysisText').textContent = r.situationAnalysis || ''
-
-    const weaknessTip = document.getElementById('weaknessTip')
-    weaknessTip.innerHTML = r.weaknessTip
-      ? `<div class="tip-box warn">⚠️ ${escapeHtml(r.weaknessTip)}</div>` : ''
-
-    const frameworkTip = document.getElementById('frameworkTip')
-    frameworkTip.innerHTML = r.frameworkTip
-      ? `<div class="tip-box info">💡 ${escapeHtml(r.frameworkTip)}</div>` : ''
-
-    // 回复建议
-    document.getElementById('repliesCount').textContent = `${r.replies?.length || 0} 条`
-    document.getElementById('repliesContainer').innerHTML = (r.replies || []).map(reply => `
-      <div class="reply-item ${reply.isRecommended ? 'recommended' : ''}">
-        <div class="reply-header">
-          <div class="reply-tags">
-            ${reply.isRecommended ? '<span class="reply-tag rec">推荐</span>' : ''}
-            ${reply.tone ? `<span class="reply-tag">${escapeHtml(reply.tone)}</span>` : ''}
-          </div>
-          <button class="copy-btn" onclick="copyText(this, '${escapeAttr(reply.text)}')">复制</button>
+  document.getElementById('replyCnt').textContent = `${currentReplies.length} 条`
+  document.getElementById('replyList').innerHTML = currentReplies.map((reply, idx) => `
+    <div class="reply-card${reply.isRecommended?' rec':''}">
+      <div class="reply-hd">
+        <div class="reply-tags">
+          ${reply.isRecommended?'<span class="rtag rtag-rec">推荐</span>':''}
+          ${reply.tone?`<span class="rtag">${esc(reply.tone)}</span>`:''}
         </div>
-        <div class="reply-text">${escapeHtml(reply.text)}</div>
-        <div class="reply-reason">${escapeHtml(reply.direction || '')}</div>
+        <button class="copy-btn" data-idx="${idx}" onclick="copyReply(this)">复制</button>
       </div>
-    `).join('')
+      <div class="reply-text">${esc(reply.text)}</div>
+      <div class="reply-dir">${esc(reply.direction||'')}</div>
+    </div>
+  `).join('')
 
-    // 避免说
-    if (r.avoid?.length > 0) {
-      document.getElementById('avoidContainer').innerHTML = r.avoid.map(a => `
-        <div class="avoid-item">
-          <span class="avoid-label">✗</span>
-          <div><span style="color:#ff4d4f;font-weight:500">"${escapeHtml(a.text)}"</span><span class="avoid-reason"> — ${escapeHtml(a.reason)}</span></div>
-        </div>
-      `).join('')
-      document.getElementById('avoidCard').style.display = 'block'
-    } else {
-      document.getElementById('avoidCard').style.display = 'none'
-    }
-
-    document.getElementById('result').style.display = 'block'
-    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' })
+  if (r.avoid?.length) {
+    document.getElementById('avoidList').innerHTML = r.avoid.map(a => `
+      <div class="avoid-row">
+        <span style="color:#ff4d4f;font-weight:500;flex-shrink:0">✗</span>
+        <div><span style="color:#ff4d4f;font-weight:500">"${esc(a.text)}"</span><span style="color:#aaa;font-size:12px"> — ${esc(a.reason)}</span></div>
+      </div>`).join('')
+    document.getElementById('avoidCard').style.display = 'block'
+  } else {
+    document.getElementById('avoidCard').style.display = 'none'
   }
 
-  function copyText(btn, text) {
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = '已复制'
-      btn.classList.add('copied')
-      setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied') }, 1500)
+  document.getElementById('resultWrap').style.display = 'block'
+  document.getElementById('resultWrap').scrollIntoView({ behavior:'smooth', block:'start' })
+}
+
+// ──────────────────────────────────────
+// 复制回复（反馈回路）
+// ──────────────────────────────────────
+function copyReply(btn) {
+  const idx = parseInt(btn.dataset.idx)
+  const reply = currentReplies[idx]
+  if (!reply) return
+
+  // 复制到剪贴板
+  const text = reply.text
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => flashCopied(btn))
+  } else {
+    // 降级方案
+    const el = document.createElement('textarea')
+    el.value = text
+    el.style.position = 'fixed'; el.style.opacity = '0'
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
+    flashCopied(btn)
+  }
+
+  // 反馈：保存样本 + 记录行为
+  fetch('/api/sample/save', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ text, scene: currentScene })
+  }).catch(() => {})
+
+  fetch('/api/feedback', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      contactId: selMsg?.contactId || 'manual',
+      scene: currentScene,
+      intent: currentScene,
+      chosenDirection: reply.direction || '',
+      wasRecommended: !!reply.isRecommended,
+      notLikeMe: false
     })
+  }).catch(() => {})
+}
+
+function flashCopied(btn) {
+  btn.textContent = '已复制'; btn.classList.add('done')
+  setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('done') }, 1500)
+}
+
+// ──────────────────────────────────────
+// 模态框
+// ──────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open')
+  if (id === 'profileModal') loadProfile()
+  if (id === 'contactModal') loadContacts()
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open')
+}
+// 点遮罩关闭
+document.querySelectorAll('.overlay').forEach(el => {
+  el.addEventListener('click', e => { if(e.target === el) el.classList.remove('open') })
+})
+
+// ──────────────────────────────────────
+// 用户画像
+// ──────────────────────────────────────
+let profileData = null
+let analyzeReport = null
+
+async function loadProfile() {
+  const res = await fetch('/api/profile')
+  const data = await res.json()
+  profileData = data.profile
+  renderProfile(profileData, null)
+}
+
+async function runAnalyze() {
+  const btn = document.getElementById('analyzeBtn')
+  btn.disabled = true; btn.textContent = '分析中...'
+  try {
+    const res = await fetch('/api/profile/analyze', { method: 'POST' })
+    const data = await res.json()
+    analyzeReport = data.report
+    const pRes = await fetch('/api/profile')
+    profileData = (await pRes.json()).profile
+    renderProfile(profileData, analyzeReport)
+  } finally {
+    btn.disabled = false; btn.textContent = '重新分析'
+  }
+}
+
+function renderProfile(profile, report) {
+  const body = document.getElementById('profileBody')
+  const style = profile?.style || {}
+  const weaknesses = profile?.weaknesses || []
+  const WNAMES = {W01:'冲动表达',W02:'不会拒绝',W03:'过度道歉',W04:'冲突逃避',W05:'表达不清',W06:'情感生硬',W07:'防御解释',W08:'回避想法'}
+  const WDESCS = {W01:'撤回率高，事后解释多',W02:'先答应后找借口反悔',W03:'道歉词密度异常高',W04:'冲突类消息回复率低',W05:'对方频繁追问同一件事',W06:'关心类表达后反应平淡',W07:'解释性句式比例高',W08:'「随便/都行」频率高'}
+
+  let html = ''
+
+  if (report) {
+    html += `<div class="analyze-result">✅ 分析完成：共分析 <strong>${report.totalMessages}</strong> 条消息，归档 <strong>${report.samplesArchived}</strong> 条最佳样本</div>`
   }
 
-  function updateCharCount(el) {
-    document.getElementById('charCount').textContent = el.value.length
+  html += `<div class="profile-section">
+    <div class="profile-section-title">说话风格</div>
+    <div class="style-grid">
+      <div class="style-item"><div class="lbl">平均字数</div><div class="val">${style.avgLength||12} 字</div></div>
+      <div class="style-item"><div class="lbl">Emoji 频率</div><div class="val">${{rare:'少用',medium:'适中',high:'频繁'}[style.emojiFrequency]||'适中'}</div></div>
+      <div class="style-item"><div class="lbl">使用句号</div><div class="val">${style.usePeriod?'是':'否'}</div></div>
+      <div class="style-item"><div class="lbl">常用词</div><div class="val" style="font-size:12px;font-weight:400">${(style.commonWords||[]).slice(0,6).join('、')||'暂无'}</div></div>
+    </div>
+  </div>`
+
+  // 待确认的弱项（来自分析报告）
+  const candidates = report?.weaknessCandidates || []
+  if (candidates.length > 0) {
+    html += `<div class="profile-section">
+      <div class="profile-section-title">检测到的沟通弱项（请确认）</div>
+      ${candidates.map(c => `
+        <div class="weakness-item">
+          <div class="weakness-info">
+            <div class="weakness-name">${esc(c.name)} <span class="w-count">检测到 ${c.count} 次</span></div>
+            <div class="weakness-desc">${esc(WDESCS[c.id]||'')}</div>
+          </div>
+          <button class="btn-ghost" style="font-size:12px;padding:4px 10px" onclick="dismissW('${c.id}')">忽略</button>
+          <button class="btn-solid" style="font-size:12px;padding:4px 10px" onclick="confirmW('${c.id}')">确认</button>
+        </div>`).join('')}
+    </div>`
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-  }
-  function escapeAttr(s) {
-    return String(s).replace(/'/g, "\\'").replace(/\n/g, ' ')
+  // 已确认的弱项
+  if (weaknesses.length > 0) {
+    html += `<div class="profile-section">
+      <div class="profile-section-title">已确认的弱项</div>
+      ${weaknesses.map(id => `
+        <div class="weakness-item">
+          <div class="weakness-info">
+            <div class="weakness-name">${esc(WNAMES[id]||id)} <span class="w-confirmed">已加入画像</span></div>
+            <div class="weakness-desc">${esc(WDESCS[id]||'')}</div>
+          </div>
+          <button class="btn-danger" style="font-size:12px;padding:4px 10px" onclick="dismissW('${id}')">移除</button>
+        </div>`).join('')}
+    </div>`
   }
 
-  connectWebSocket()
+  if (!report && !weaknesses.length && !candidates.length) {
+    html += `<div class="empty" style="padding:20px 0">点击「分析历史消息」开始构建画像</div>`
+  }
+
+  body.innerHTML = html
+}
+
+async function confirmW(id) {
+  await fetch('/api/profile/weakness/confirm', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) })
+  loadProfile()
+}
+async function dismissW(id) {
+  await fetch('/api/profile/weakness/dismiss', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) })
+  loadProfile()
+}
+
+// ──────────────────────────────────────
+// 联系人
+// ──────────────────────────────────────
+let editingContact = null
+
+async function loadContacts() {
+  const res = await fetch('/api/contacts')
+  const data = await res.json()
+  renderContactList(data.contacts || [])
+}
+
+function renderContactList(contacts) {
+  const OMAP2 = {friend:'朋友',work:'工作群',family:'家人',colleague:'同事',boss:'上司',stranger:'陌生人',business:'商务'}
+  const RMAP = {friend:'朋友',peer:'平级同事',superior:'上级',subordinate:'下级',family:'家人',business:'商务',stranger:'陌生人'}
+  document.getElementById('contactList').innerHTML = contacts.length
+    ? contacts.map(c => `
+      <div class="contact-item" onclick="showContactForm('${esc(c.id)}', ${esc(JSON.stringify(c))})">
+        <div class="contact-av" style="background:${color(c.id)}">${initial(c.name)}</div>
+        <div class="contact-info">
+          <div class="contact-name">${esc(c.name)}</div>
+          <div class="contact-meta">${esc(OMAP2[c.occasion]||c.occasion)} · ${esc(RMAP[c.relationshipType]||c.relationshipType)}</div>
+        </div>
+      </div>`).join('')
+    : '<div class="empty" style="padding:20px 0;color:#ccc">暂无联系人</div>'
+  document.getElementById('contactForm').style.display = 'none'
+  document.getElementById('contactFoot').innerHTML = `<button class="btn-ghost" onclick="closeModal('contactModal')">关闭</button>`
+}
+
+function showContactForm(id, data) {
+  editingContact = id
+  document.getElementById('contactList').style.display = 'none'
+  const form = document.getElementById('contactForm')
+  form.style.display = 'block'
+  document.getElementById('cfId').value = data?.id || ''
+  document.getElementById('cfId').disabled = !!id
+  document.getElementById('cfName').value = data?.name || ''
+  document.getElementById('cfOcc').value = data?.occasion || 'friend'
+  document.getElementById('cfRel').value = data?.relationshipType || 'friend'
+  document.getElementById('cfStatus').value = data?.relationshipStatus || 'normal'
+  document.getElementById('contactFoot').innerHTML = `
+    <button class="btn-ghost" onclick="cancelContactForm()">取消</button>
+    <button class="btn-solid" onclick="saveContact()">保存</button>`
+}
+
+function cancelContactForm() {
+  document.getElementById('contactList').style.display = 'block'
+  document.getElementById('contactForm').style.display = 'none'
+  loadContacts()
+}
+
+async function saveContact() {
+  const body = {
+    id: document.getElementById('cfId').value.trim(),
+    name: document.getElementById('cfName').value.trim(),
+    occasion: document.getElementById('cfOcc').value,
+    relationshipType: document.getElementById('cfRel').value,
+    relationshipStatus: document.getElementById('cfStatus').value,
+  }
+  if (!body.id || !body.name) { alert('ID 和备注名不能为空'); return }
+  await fetch('/api/contacts', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+  cancelContactForm()
+}
+
+// ──────────────────────────────────────
+// Skills
+// ──────────────────────────────────────
+async function openSkills() {
+  openModal('skillModal')
+  const res = await fetch('/api/skills')
+  const data = await res.json()
+  const skills = data.skills || []
+  const SCENE_LABEL = {criticism:'批评',conflict:'冲突',request:'请求',negotiation:'协商',emotional:'情绪化',invitation:'邀约',persuasion:'说服',workplace:'职场',casual:'日常',disagreement:'分歧',demand:'催促'}
+  document.getElementById('skillBody').innerHTML = skills.length
+    ? skills.map(s => `
+      <div class="skill-card">
+        <div class="skill-name">📖 ${esc(s.title)}</div>
+        <div class="skill-desc">${esc(s.description||'')}</div>
+        <div class="skill-scenes">${(s.scenes||[]).map(sc=>`<span class="skill-scene">${esc(SCENE_LABEL[sc]||sc)}</span>`).join('')}</div>
+      </div>`).join('')
+    : '<div class="empty" style="padding:20px 0">暂无加载的 Skill<br><span style="font-size:11px">在 skills/ 目录下添加 SKILL.md 文件</span></div>'
+}
+
+// ──────────────────────────────────────
+// 启动
+// ──────────────────────────────────────
+connectWS()
 </script>
 </body>
 </html>

@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from 'ws'
 import { createServer } from 'http'
 import { generateReplies } from '../reasoning/assistant'
 import { buildProfile, confirmWeakness, dismissWeakness } from '../analysis/profile-builder'
-import { getProfile, saveContact, getContact, getAllContacts, addFeedback } from '../data/storage'
+import { getProfile, saveContact, getContact, getAllContacts, addFeedback, addSample } from '../data/storage'
 import { exportAllMessages } from '../data/weflow-client'
 import { registry } from '../skill/skill-registry'
 import { UserGoal, WeaknessId, Occasion, RelationshipType, RelationshipStatus } from '../types'
@@ -99,6 +99,15 @@ app.post('/api/feedback', (req, res) => {
     wasRecommended: !!wasRecommended,
     notLikeMe: !!notLikeMe,
   })
+  res.json({ ok: true })
+})
+
+// --- 样本保存（反馈回路：用户复制了某条回复，存为最佳样本）---
+
+app.post('/api/sample/save', (req, res) => {
+  const { text, scene } = req.body
+  if (!text) return res.status(400).json({ error: 'text required' })
+  addSample(scene || 'casual', text)
   res.json({ ok: true })
 })
 
