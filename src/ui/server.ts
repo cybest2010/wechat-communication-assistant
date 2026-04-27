@@ -5,7 +5,8 @@ import { createServer } from 'http'
 import { generateReplies } from '../reasoning/assistant'
 import { buildProfile, confirmWeakness, dismissWeakness } from '../analysis/profile-builder'
 import { getProfile, saveContact, getContact, getAllContacts, addFeedback, addSample } from '../data/storage'
-import { exportAllMessages, getContacts } from '../data/weflow-client'
+import { exportAllMessages, getContacts, refreshClient } from '../data/weflow-client'
+import { getWeFlowConfig, updateWeFlowConfig } from '../data/config'
 import { registry } from '../skill/skill-registry'
 import { UserGoal, WeaknessId, Occasion, RelationshipType, RelationshipStatus } from '../types'
 // Occasion type used for request body typing (passed through to generateReplies)
@@ -155,6 +156,31 @@ app.post('/api/listener/start', (_req, res) => {
 app.post('/api/listener/stop', (_req, res) => {
   messageListener.stop()
   res.json({ ok: true })
+})
+
+// --- WeFlow 配置（动态修改推送地址）---
+
+app.get('/api/config/weflow', (_req, res) => {
+  const cfg = getWeFlowConfig()
+  // 隐藏 token 明文，只返回是否已设置
+  res.json({
+    apiUrl: cfg.apiUrl,
+    accessTokenSet: cfg.accessToken.length > 0,
+  })
+})
+
+app.post('/api/config/weflow', (req, res) => {
+  const { apiUrl, accessToken } = req.body
+  if (!apiUrl) return res.status(400).json({ error: 'apiUrl required' })
+
+  const patch: { apiUrl: string; accessToken?: string } = { apiUrl }
+  if (typeof accessToken === 'string') patch.accessToken = accessToken
+
+  updateWeFlowConfig(patch)
+  refreshClient()
+  messageListener.restart()
+
+  res.json({ ok: true, apiUrl })
 })
 
 // --- 启动 ---
