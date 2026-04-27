@@ -181,6 +181,16 @@
 
   /* ── 分隔线 ── */
   .divider { height: 1px; background: #f0f0f0; margin: 12px 0; }
+
+  /* ── WeFlow 配置模态框 ── */
+  .cfg-row { margin-bottom: 16px; }
+  .cfg-label { font-size: 12px; color: #888; margin-bottom: 5px; }
+  .cfg-input { width: 100%; border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; font-family: inherit; }
+  .cfg-input:focus { border-color: #07c160; }
+  .cfg-hint { font-size: 11px; color: #bbb; margin-top: 4px; }
+  .cfg-status { font-size: 12px; padding: 6px 10px; border-radius: 6px; margin-top: 12px; display: none; }
+  .cfg-status.ok  { display: block; background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+  .cfg-status.err { display: block; background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
 </style>
 </head>
 <body>
@@ -196,6 +206,7 @@
     <button class="icon-btn" onclick="openModal('profileModal')">👤 我的画像</button>
     <button class="icon-btn" onclick="openModal('contactModal')">📋 联系人</button>
     <button class="icon-btn" onclick="openSkills()">🧠 Skills</button>
+    <button class="icon-btn" onclick="openWeFlowConfig()">⚙️ WeFlow 配置</button>
     <div class="toggle-wrap">
       <span class="toggle-label" id="mLbl">手动</span>
       <label class="toggle"><input type="checkbox" id="modeToggle" checked><span class="slider"></span></label>
@@ -438,6 +449,33 @@
     </div>
     <div class="modal-foot">
       <button class="btn-ghost" onclick="closeModal('skillModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── WeFlow 配置模态框 ── -->
+<div class="overlay" id="weflowConfigModal">
+  <div class="modal" style="width:480px">
+    <div class="modal-hd">
+      <span class="modal-title">⚙️ WeFlow 推送配置</span>
+      <button class="modal-close" onclick="closeModal('weflowConfigModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cfg-row">
+        <div class="cfg-label">WeFlow API 地址</div>
+        <input class="cfg-input" id="cfgApiUrl" type="text" placeholder="http://localhost:5031" />
+        <div class="cfg-hint">WeFlow HTTP API 的地址，修改后将立即重新连接 SSE 推送</div>
+      </div>
+      <div class="cfg-row">
+        <div class="cfg-label">Access Token（可选）</div>
+        <input class="cfg-input" id="cfgToken" type="password" placeholder="留空表示不修改当前 Token" autocomplete="off" />
+        <div class="cfg-hint">留空则保留服务端已有的 Token，不会清空</div>
+      </div>
+      <div class="cfg-status" id="cfgStatus"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal('weflowConfigModal')">取消</button>
+      <button class="btn-solid" onclick="saveWeFlowConfig()">保存并重连</button>
     </div>
   </div>
 </div>
@@ -991,6 +1029,64 @@ async function openSkills() {
         <div class="skill-scenes">${(s.scenes||[]).map(sc=>`<span class="skill-scene">${esc(SCENE_LABEL[sc]||sc)}</span>`).join('')}</div>
       </div>`).join('')
     : '<div class="empty" style="padding:20px 0">暂无加载的 Skill<br><span style="font-size:11px">在 skills/ 目录下添加 SKILL.md 文件</span></div>'
+}
+
+// ──────────────────────────────────────
+// WeFlow 配置
+// ──────────────────────────────────────
+async function openWeFlowConfig() {
+  openModal('weflowConfigModal')
+  const statusEl = document.getElementById('cfgStatus')
+  statusEl.className = 'cfg-status'
+  statusEl.textContent = ''
+  try {
+    const res = await fetch('/api/config/weflow')
+    const data = await res.json()
+    document.getElementById('cfgApiUrl').value = data.apiUrl || ''
+    document.getElementById('cfgToken').value = ''
+    document.getElementById('cfgToken').placeholder = data.accessTokenSet
+      ? '已设置（留空则保持不变）'
+      : '未设置（可选）'
+  } catch {
+    statusEl.className = 'cfg-status err'
+    statusEl.textContent = '无法读取当前配置'
+  }
+}
+
+async function saveWeFlowConfig() {
+  const statusEl = document.getElementById('cfgStatus')
+  statusEl.className = 'cfg-status'
+  statusEl.textContent = ''
+
+  const apiUrl = document.getElementById('cfgApiUrl').value.trim()
+  const token  = document.getElementById('cfgToken').value
+
+  if (!apiUrl) {
+    statusEl.className = 'cfg-status err'
+    statusEl.textContent = 'API 地址不能为空'
+    return
+  }
+
+  try {
+    const body = { apiUrl }
+    if (token) body.accessToken = token
+
+    const res = await fetch('/api/config/weflow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const data = await res.json()
+    if (data.ok) {
+      statusEl.className = 'cfg-status ok'
+      statusEl.textContent = `已更新为 ${data.apiUrl}，SSE 正在重新连接...`
+    } else {
+      throw new Error(data.error || '保存失败')
+    }
+  } catch (e) {
+    statusEl.className = 'cfg-status err'
+    statusEl.textContent = e.message || '保存失败'
+  }
 }
 
 // ──────────────────────────────────────
