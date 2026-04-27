@@ -10,14 +10,12 @@ class MessageListener {
   private connected: boolean = false
   private req?: http.ClientRequest
   private reconnectTimer?: NodeJS.Timeout
-  private seenIds = new Set<string>()  // 按 rawid 去重
+  private seenIds = new Set<string>()
 
-  // 注册消息处理器
   onMessage(handler: MessageHandler) {
     this.handlers.push(handler)
   }
 
-  // 开始监听
   start() {
     if (this.connected) {
       console.log('[MessageListener] Already connected')
@@ -26,7 +24,6 @@ class MessageListener {
     this.connect()
   }
 
-  // 停止监听
   stop() {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer)
@@ -40,7 +37,13 @@ class MessageListener {
     console.log('[MessageListener] Stopped')
   }
 
-  // 建立 SSE 连接
+  /** Stop the current connection and immediately reconnect with fresh config. */
+  restart() {
+    console.log('[MessageListener] Restarting with updated config...')
+    this.stop()
+    this.connect()
+  }
+
   private connect() {
     const sseUrl = getSSEUrl()
     console.log(`[MessageListener] Connecting to SSE: ${sseUrl}`)
@@ -67,7 +70,7 @@ class MessageListener {
       res.on('data', (chunk: string) => {
         buffer += chunk
         const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''  // 保留不完整的最后一行
+        buffer = lines.pop() ?? ''
 
         for (const line of lines) {
           if (line.startsWith('event:')) {
@@ -77,7 +80,6 @@ class MessageListener {
             this.handleEvent(eventName, dataStr)
             eventName = ''
           }
-          // 空行表示事件结束，重置 eventName
           if (line === '') {
             eventName = ''
           }
@@ -104,18 +106,15 @@ class MessageListener {
     })
   }
 
-  // 处理 SSE 事件
   private handleEvent(eventName: string, dataStr: string) {
     if (eventName !== 'message.new') return
 
     try {
       const data: WeFlowSSEMessage = JSON.parse(dataStr)
 
-      // 按 rawid 去重
       if (this.seenIds.has(data.rawid)) return
       this.seenIds.add(data.rawid)
       if (this.seenIds.size > 1000) {
-        // 防止内存无限增长，只保留最新 500 条
         const arr = Array.from(this.seenIds)
         this.seenIds = new Set(arr.slice(arr.length - 500))
       }
@@ -135,7 +134,6 @@ class MessageListener {
     }
   }
 
-  // 断线重连（3 秒后）
   private scheduleReconnect() {
     if (this.reconnectTimer) return
     this.reconnectTimer = setTimeout(() => {
