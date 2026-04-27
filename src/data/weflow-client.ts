@@ -1,34 +1,26 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { Message } from '../types'
-
-const BASE_URL = process.env.WEFLOW_API_URL || 'http://localhost:5031'
-const ACCESS_TOKEN = process.env.WEFLOW_ACCESS_TOKEN || ''
-
-const client = axios.create({
-  baseURL: BASE_URL,
-  params: ACCESS_TOKEN ? { access_token: ACCESS_TOKEN } : {},
-  timeout: 10000,
-})
+import { getWeFlowConfig } from './config'
 
 // SSE 推送的消息格式（message.new / message.revoke 事件）
 export interface WeFlowSSEMessage {
   sessionId: string
-  sessionType: string       // 'private' | 'group'
-  rawid: string             // 去重用
+  sessionType: string
+  rawid: string
   avatarUrl: string
-  sourceName: string        // 私聊：发送者名；群聊：发送者名
-  groupName?: string        // 群聊时有
+  sourceName: string
+  groupName?: string
   content: string
-  timestamp: number         // 秒级 Unix 时间戳
+  timestamp: number
 }
 
 // REST API 的历史消息格式
 export interface WeFlowHistoryMessage {
   localId: string
   serverId?: string
-  sessionId?: string        // 全量导出时由 API 附带，用于与 getHistoryMessages 保持一致
-  createTime: number        // 秒级 Unix 时间戳
-  isSend: boolean           // true = 自己发的
+  sessionId?: string
+  createTime: number
+  isSend: boolean
   senderUsername: string
   content: string
   rawContent?: string
@@ -41,7 +33,22 @@ export interface WeFlowContact {
   isRoom: boolean
 }
 
-// 将 SSE 消息转为内部格式
+let client: AxiosInstance = buildClient()
+
+function buildClient(): AxiosInstance {
+  const { apiUrl, accessToken } = getWeFlowConfig()
+  return axios.create({
+    baseURL: apiUrl,
+    params: accessToken ? { access_token: accessToken } : {},
+    timeout: 10000,
+  })
+}
+
+/** Call this after updating WeFlow config to apply the new URL / token. */
+export function refreshClient(): void {
+  client = buildClient()
+}
+
 export function normalizeSSEMessage(m: WeFlowSSEMessage): Message {
   const contactId = m.sessionId
   const contactName = m.groupName ? `${m.groupName} - ${m.sourceName}` : m.sourceName
@@ -51,12 +58,11 @@ export function normalizeSSEMessage(m: WeFlowSSEMessage): Message {
     contactName,
     content: m.content,
     sender: 'contact',
-    timestamp: m.timestamp * 1000,  // 转为毫秒
+    timestamp: m.timestamp * 1000,
     isRecalled: false,
   }
 }
 
-// 获取某会话的历史消息（REST API）
 export async function getHistoryMessages(sessionId: string, limit = 20): Promise<Message[]> {
   try {
     const res = await client.get(`/api/v1/sessions/${sessionId}/messages`, { params: { limit } })
@@ -76,9 +82,6 @@ export async function getHistoryMessages(sessionId: string, limit = 20): Promise
   }
 }
 
-// 导出全量历史消息（用于初始化分析）
-// contactId 优先级：传入的 sessionId > 消息自带的 sessionId > senderUsername（兜底）
-// 保证与 getHistoryMessages 使用相同的 contactId，使 byOccasion 分析能正确关联联系人
 export async function exportAllMessages(sessionId?: string): Promise<Message[]> {
   try {
     const params = sessionId ? { sessionId } : {}
@@ -99,7 +102,6 @@ export async function exportAllMessages(sessionId?: string): Promise<Message[]> 
   }
 }
 
-// 获取联系人列表
 export async function getContacts(): Promise<WeFlowContact[]> {
   try {
     const res = await client.get('/api/v1/contacts')
@@ -110,9 +112,9 @@ export async function getContacts(): Promise<WeFlowContact[]> {
   }
 }
 
-// 构建 SSE 推送地址
 export function getSSEUrl(): string {
-  const url = new URL('/api/v1/push/messages', BASE_URL)
-  if (ACCESS_TOKEN) url.searchParams.set('access_token', ACCESS_TOKEN)
+  const { apiUrl, accessToken } = getWeFlowConfig()
+  const url = new URL('/api/v1/push/messages', apiUrl)
+  if (accessToken) url.searchParams.set('access_token', accessToken)
   return url.toString()
 }
